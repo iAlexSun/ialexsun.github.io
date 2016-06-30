@@ -107,7 +107,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/App上架/" style="font-size: 10px;">App上架</a> <a href="/tags/开始/" style="font-size: 10px;">开始</a> <a href="/tags/我/" style="font-size: 10px;">我</a> <a href="/tags/日记/" style="font-size: 10px;">日记</a> <a href="/tags/错误编码/" style="font-size: 10px;">错误编码</a>
+						<a href="/tags/开始/" style="font-size: 10px;">开始</a> <a href="/tags/我/" style="font-size: 10px;">我</a> <a href="/tags/日记/" style="font-size: 10px;">日记</a>
 					</div>
 				</section>
 				
@@ -172,74 +172,6 @@
 </nav>
 
       <div class="body-wrap">
-  
-    <article id="post-第一次上架App的坑" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/06/30/第一次上架App的坑/" class="article-date">
-  	<time datetime="2016-06-30T02:38:27.000Z" itemprop="datePublished">2016-06-30</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/30/第一次上架App的坑/">第一次上架App的坑</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong>第一次上架App的坑</strong></p>
-<p>引入动态库产生的App审核错误编码记录:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR ITMS-90087: &quot;Unsupported Architecture.The executable for XX.app/Frameworks/XXX.Framework  contains unsupported architecture&apos;[x86_64, i386]&apos;.&quot;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR ITMS-90125: &quot;The Binary is invalid. The encryption info in the LC_ENCRYPTION_INFO load command is either missing or invalid, or the binary is already encrypted. This binary does not seem to have been built with Apple&apos;s Linker.&quot;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR ITMS-90209: &quot;Invalid segment Alignment. The App Binary at XXX.app/Frameworks/xxx.framework/XXX does not have proper segment alignment. Try rebuilding the app with the latest xcode version.&quot; (I am already using the latest version.)</span><br></pre></td></tr></table></figure>
-<p>解决办法:在stackoverflow搜索的方法添加一段build phase在程序中可以解决</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">APP_PATH=&quot;$&#123;TARGET_BUILD_DIR&#125;/$&#123;WRAPPER_NAME&#125;&quot;</span><br><span class="line"></span><br><span class="line"># This script loops through the frameworks embedded in the application and</span><br><span class="line"># removes unused architectures.</span><br><span class="line">find &quot;$APP_PATH&quot; -name &apos;*.framework&apos; -type d | while read -r FRAMEWORK</span><br><span class="line">do</span><br><span class="line">FRAMEWORK_EXECUTABLE_NAME=$(defaults read &quot;$FRAMEWORK/Info.plist&quot; CFBundleExecutable)</span><br><span class="line">FRAMEWORK_EXECUTABLE_PATH=&quot;$FRAMEWORK/$FRAMEWORK_EXECUTABLE_NAME&quot;</span><br><span class="line">echo &quot;Executable is $FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line"></span><br><span class="line">EXTRACTED_ARCHS=()</span><br><span class="line"></span><br><span class="line">for ARCH in $ARCHS</span><br><span class="line">do</span><br><span class="line">echo &quot;Extracting $ARCH from $FRAMEWORK_EXECUTABLE_NAME&quot;</span><br><span class="line">lipo -extract &quot;$ARCH&quot; &quot;$FRAMEWORK_EXECUTABLE_PATH&quot; -o &quot;$FRAMEWORK_EXECUTABLE_PATH-$ARCH&quot;</span><br><span class="line">EXTRACTED_ARCHS+=(&quot;$FRAMEWORK_EXECUTABLE_PATH-$ARCH&quot;)</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo &quot;Merging extracted architectures: $&#123;ARCHS&#125;&quot;</span><br><span class="line">lipo -o &quot;$FRAMEWORK_EXECUTABLE_PATH-merged&quot; -create &quot;$&#123;EXTRACTED_ARCHS[@]&#125;&quot;</span><br><span class="line">rm &quot;$&#123;EXTRACTED_ARCHS[@]&#125;&quot;</span><br><span class="line"></span><br><span class="line">echo &quot;Replacing original executable with thinned version&quot;</span><br><span class="line">rm &quot;$FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line">mv &quot;$FRAMEWORK_EXECUTABLE_PATH-merged&quot; &quot;$FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line"></span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-<hr>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/App上架/">App上架</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/错误编码/">错误编码</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/日志/">日志</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
   
     <article id="post-新的开始" class="article article-type-post" itemscope itemprop="blogPost">
   
