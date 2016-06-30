@@ -225,10 +225,11 @@
 <p>可能遇到的错误提示及解决方法：</p>
 <p>Error 1：<br>Error fetching <a href="http://ruby.taobao.org/" target="_blank" rel="external">http://ruby.taobao.org/</a>:</p>
 <p>bad response Not Found 404 (<a href="http://ruby.taobao.org/specs.4.8.gz" target="_blank" rel="external">http://ruby.taobao.org/specs.4.8.gz</a>)</p>
-<p>解决方案：把安装流程中<figure class="highlight plain"><figcaption><span>gem sources -a</span><a href="http://ruby.taobao.org/" target="_blank" rel="external">```</a></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">改为：```&#123;bash&#125;$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure></p>
+<p>解决方案：把安装流程中<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -a http://ruby.taobao.org/</span><br></pre></td></tr></table></figure></p>
+<p>改为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;bash&#125;$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure></p>
 <p>Error 2：<br>ERROR:  While executing gem … (Errno::EPERM)</p>
 <p>Operation not permitted - /usr/bin/pod</p>
-<p>解决方案：苹果系统升级 OS X EL Capitan 后会出现的插件错误，将安装流程 4.安装 CocoaPods 的 sudo gem install cocoapods</p>
+<p>解决方案：苹果系统升级 OS X EL Capitan 后会出现的插件错误，将安装流程(4) 安装 CocoaPods 的 sudo gem install cocoapods</p>
 <p>改为 sudo gem install -n /usr/local/bin cocoapods</p>
 <h2 id="＃以上很多借鉴了很多大神的博客-只是把遇到的坑和写的不足的地方总结在一起-站在巨人肩膀上进步的更快＃"><a href="#＃以上很多借鉴了很多大神的博客-只是把遇到的坑和写的不足的地方总结在一起-站在巨人肩膀上进步的更快＃" class="headerlink" title="＃以上很多借鉴了很多大神的博客,只是把遇到的坑和写的不足的地方总结在一起,站在巨人肩膀上进步的更快＃"></a>＃以上很多借鉴了很多大神的博客,只是把遇到的坑和写的不足的地方总结在一起,站在巨人肩膀上进步的更快＃</h2><p>PS:以下是自己引入动态库踩过得坑,如果各位遇到过可以借鉴以下：<br>引入动态库产生的App审核错误编码记录:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR ITMS-90087: &quot;Unsupported Architecture.The executable for XX.app/Frameworks/XXX.Framework  contains unsupported architecture&apos;[x86_64, i386]&apos;.&quot;</span><br></pre></td></tr></table></figure>
