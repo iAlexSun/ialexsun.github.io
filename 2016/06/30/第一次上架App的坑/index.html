@@ -20,7 +20,7 @@ CocoaPods是">
 优点:方便,直接拖入操作简单缺点:审核时候会产生各种奇葩的错误
 在项目开始时候不知道动态库会有很多坑,也可能操作姿势不对.这都不重要了，主要想记录一下如何使用CocoaPods添加第三方库.可以避免很多不必要的麻烦,第三方库更新也不用手动管理.
 CocoaPods是">
-<meta property="og:updated_time" content="2016-06-30T03:45:21.000Z">
+<meta property="og:updated_time" content="2016-06-30T03:47:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何使用CocoaPods添加第三方库">
 <meta name="twitter:description" content="前言
@@ -234,9 +234,9 @@ CocoaPods是">
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -l</span><br></pre></td></tr></table></figure>
 <p>默认在终端中出现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">*** CURRENT SOURCES ***</span><br><span class="line">https://rubygems.org/</span><br></pre></td></tr></table></figure></p>
 <ol>
-<li>配置环境<br>移除现有 Ruby 默认源，使用国内淘宝的ruby镜像, 命令如下</li>
+<li>配置环境移除现有 Ruby 默认源，使用国内淘宝的ruby镜像, 命令如下<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources --remove https://rubygems.org/</span><br><span class="line">$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources --remove https://rubygems.org/</span><br><span class="line">$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure>
 <p>3.验证新源是否替换成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -l</span><br></pre></td></tr></table></figure></p>
 <p>4.安装 CocoaPods(安装时间可能有些长，大小约700M左右)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install cocoapods</span><br><span class="line">$ pod setup</span><br></pre></td></tr></table></figure></p>
 <p>注意：苹果系统升级 OS X EL Capitan 后安装改为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install -n /usr/local/bin cocoapods</span><br><span class="line">$ pod setup</span><br></pre></td></tr></table></figure></p>

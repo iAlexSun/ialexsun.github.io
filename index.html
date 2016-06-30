@@ -208,9 +208,9 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -l</span><br></pre></td></tr></table></figure>
 <p>默认在终端中出现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">*** CURRENT SOURCES ***</span><br><span class="line">https://rubygems.org/</span><br></pre></td></tr></table></figure></p>
 <ol>
-<li>配置环境<br>移除现有 Ruby 默认源，使用国内淘宝的ruby镜像, 命令如下</li>
+<li>配置环境移除现有 Ruby 默认源，使用国内淘宝的ruby镜像, 命令如下<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources --remove https://rubygems.org/</span><br><span class="line">$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources --remove https://rubygems.org/</span><br><span class="line">$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure>
 <p>3.验证新源是否替换成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -l</span><br></pre></td></tr></table></figure></p>
 <p>4.安装 CocoaPods(安装时间可能有些长，大小约700M左右)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install cocoapods</span><br><span class="line">$ pod setup</span><br></pre></td></tr></table></figure></p>
 <p>注意：苹果系统升级 OS X EL Capitan 后安装改为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install -n /usr/local/bin cocoapods</span><br><span class="line">$ pod setup</span><br></pre></td></tr></table></figure></p>
