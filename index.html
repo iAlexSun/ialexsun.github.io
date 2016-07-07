@@ -105,7 +105,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/App上架/" style="font-size: 10px;">App上架</a> <a href="/tags/cocoapods/" style="font-size: 10px;">cocoapods</a> <a href="/tags/我/" style="font-size: 10px;">我</a> <a href="/tags/简历/" style="font-size: 10px;">简历</a> <a href="/tags/错误编码/" style="font-size: 10px;">错误编码</a>
+						<a href="/tags/App上架/" style="font-size: 10px;">App上架</a> <a href="/tags/GCD/" style="font-size: 10px;">GCD</a> <a href="/tags/cocoapods/" style="font-size: 10px;">cocoapods</a> <a href="/tags/多线程/" style="font-size: 10px;">多线程</a> <a href="/tags/我/" style="font-size: 10px;">我</a> <a href="/tags/简历/" style="font-size: 10px;">简历</a> <a href="/tags/错误编码/" style="font-size: 10px;">错误编码</a>
 					</div>
 				</section>
 				
@@ -168,6 +168,119 @@
 </nav>
 
       <div class="body-wrap">
+  
+    <article id="post-多线程GCD" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/07/06/多线程GCD/" class="article-date">
+  	<time datetime="2016-07-06T02:38:27.000Z" itemprop="datePublished">2016-07-06</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/07/06/多线程GCD/">GCD的理解和简单的使用(一)</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前言<br>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
+<p>###线程</p>
+<ul>
+<li><p>一个应用程序开启一定会有一个进程,<code>必须</code>得有线程（每1个进程至少要有1条线程）.一个进程（程序）的所有任务都在线程中执行。</p>
+</li>
+<li><p>一个线程的任务是<code>串行</code>的,如果执行多个任务就要一个接着一个的按顺序的执行下去</p>
+</li>
+</ul>
+<p>###多线程</p>
+<ul>
+<li><p>如果开启多线程就会每条线程并行的执行任务,可以大大提高开发效率,比如可以同时开启3条线程同时下载3个文件.</p>
+</li>
+<li><p>同一个时间内CPU只能处理一个线程,只有一条线程在<code>执行</code>.那么为什么还会出现<code>并发</code>执行?因为CPU在快速的在多线程中快速的<code>调度</code>(切换),如果时间足够快那么就会造成多线程并发的假象。是不是线程越多就越好? </p>
+</li>
+<li><code>如果线程多到CPU切换不过来,CPU会非常消耗资源，CPU会累死，每条线程被调度到的频率大大降低,所以应该合理使用多线程</code>.  </li>
+</ul>
+<p>####ios程序中使用的多线程种类</p>
+<ul>
+<li>pthread:C语言,跨平台，复杂(使用较少).</li>
+<li>NSThread:面向对象，程序员管理(使用较少).</li>
+<li>GCD:利用CPU多核技术进行多线程开发(经常使用).</li>
+<li><p>NSOperation:将同步与异步函数封装在内部(经常使用).</p>
+<p><a href="http://ac-mcm5vzvc.clouddn.com/cd2caa657a209753.png" target="_blank" rel="external"></a></p>
+</li>
+</ul>
+<p>###什么是GCD</p>
+<ul>
+<li><p>GCD(Grand Central Dispatch)</p>
+<ul>
+<li>作为纯C语言一个处理多线程,，提供非常多强大的函数,自从iOS4.0被引入后。GCD依然是目前Apple开发的一个官网推荐的多核编程的开发方法。GCD 是一个可以替代诸如 NSThread, NSOperationQueue, NSInvocationOperation等技术的很高效和强大的技术。</li>
+</ul>
+</li>
+</ul>
+<p>####GCD常用函数</p>
+<ul>
+<li><p>GCD分为异步函数,同步函数</p>
+</li>
+<li><p>异步函数:</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_async(dispatch_queue_t queue(), ^&#123;</span><br><span class="line">    //something           </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">dispatch_queue_t //可以自定义,也可以使用系统的队列</span><br><span class="line">dispatch_get_global_queue(0, 0)//全局队列 </span><br><span class="line">dispatch_get_main_queue()//主线程的主队列</span><br></pre></td></tr></table></figure>
+<ul>
+<li>异步函数 + 主队列：只在主线程中执行任务  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得主队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_main_queue();</span><br><span class="line">       </span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">  NSLog(@&quot;dispatch_async(queue, ^&#123;  	         	</span><br><span class="line">     NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>异步函数 + 并发队列：可以同时开启多条线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得全局的并发队列</span><br><span class="line">  </span><br><span class="line">dispatch_queue_t queue =dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line"></span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;);</span><br><span class="line"></span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">   for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>异步函数 + 并发队列：可以同时开启多条线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得全局的并发队列</span><br><span class="line"></span><br><span class="line">dispatch_queue_t queue =dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line"></span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GCD/">GCD</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/多线程/">多线程</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/日志/">日志</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
   
     <article id="post-关于我" class="article article-type-post" itemscope itemprop="blogPost">
   
