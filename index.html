@@ -195,22 +195,21 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。<br>线程</p>
-<ul>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
+<h3 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h3><ul>
 <li><p>一个应用程序开启一定会有一个进程,<code>必须</code>得有线程（每1个进程至少要有1条线程）.一个进程（程序）的所有任务都在线程中执行。</p>
 </li>
 <li><p>一个线程的任务是<code>串行</code>的,如果执行多个任务就要一个接着一个的按顺序的执行下去</p>
 </li>
 </ul>
-<p>多线程</p>
-<ul>
+<h3 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h3><ul>
 <li><p>如果开启多线程就会每条线程并行的执行任务,可以大大提高开发效率,比如可以同时开启3条线程同时下载3个文件.</p>
 </li>
 <li><p>同一个时间内CPU只能处理一个线程,只有一条线程在<code>执行</code>.那么为什么还会出现<code>并发</code>执行?因为CPU在快速的在多线程中快速的<code>调度</code>(切换),如果时间足够快那么就会造成多线程并发的假象。是不是线程越多就越好? </p>
 </li>
 <li><code>如果线程多到CPU切换不过来,CPU会非常消耗资源，CPU会累死，每条线程被调度到的频率大大降低,所以应该合理使用多线程</code>.  </li>
 </ul>
-<h2 id="ios程序中使用的多线程种类"><a href="#ios程序中使用的多线程种类" class="headerlink" title="ios程序中使用的多线程种类"></a>ios程序中使用的多线程种类</h2><ul>
+<h3 id="ios程序中使用的多线程种类"><a href="#ios程序中使用的多线程种类" class="headerlink" title="ios程序中使用的多线程种类"></a>ios程序中使用的多线程种类</h3><ul>
 <li>pthread:C语言,跨平台，复杂(使用较少).</li>
 <li>NSThread:面向对象，程序员管理(使用较少).</li>
 <li>GCD:利用CPU多核技术进行多线程开发(经常使用).</li>
@@ -218,16 +217,8 @@
 <p><img src="http://ac-mcm5vzvc.clouddn.com/cd2caa657a209753.png" alt=""></p>
 </li>
 </ul>
-<p>什么是GCD </p>
-<ul>
-<li><p>GCD(Grand Central Dispatch)</p>
-<ul>
-<li>作为纯C语言一个处理多线程,，提供非常多强大的函数,自从iOS4.0被引入后。GCD依然是目前Apple开发的一个官网推荐的多核编程的开发方法。GCD 是一个可以替代诸如 NSThread, NSOperationQueue, NSInvocationOperation等技术的很高效和强大的技术。</li>
-</ul>
-</li>
-</ul>
-<p>GCD常用函数 </p>
-<ul>
+<h3 id="什么是GCD"><a href="#什么是GCD" class="headerlink" title="什么是GCD"></a>什么是GCD</h3><p>GCD(Grand Central Dispatch)作为纯C语言一个处理多线程，提供非常多强大的函数,自从iOS4.0被引入后。GCD依然是目前Apple开发的一个官网推荐的多核编程的开发方法。GCD 是一个可以替代诸如 NSThread, NSOperationQueue, NSInvocationOperation等技术的很高效和强大的技术。</p>
+<h3 id="GCD常用函数"><a href="#GCD常用函数" class="headerlink" title="GCD常用函数"></a>GCD常用函数</h3><ul>
 <li><p>GCD分为异步函数,同步函数</p>
 </li>
 <li><p>异步函数(async):</p>
