@@ -196,22 +196,20 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
-<p>###线程</p>
-<ul>
+<h3 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h3><ul>
 <li><p>一个应用程序开启一定会有一个进程,<code>必须</code>得有线程（每1个进程至少要有1条线程）.一个进程（程序）的所有任务都在线程中执行。</p>
 </li>
 <li><p>一个线程的任务是<code>串行</code>的,如果执行多个任务就要一个接着一个的按顺序的执行下去</p>
 </li>
 </ul>
-<p>###多线程</p>
-<ul>
+<h3 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h3><ul>
 <li><p>如果开启多线程就会每条线程并行的执行任务,可以大大提高开发效率,比如可以同时开启3条线程同时下载3个文件.</p>
 </li>
 <li><p>同一个时间内CPU只能处理一个线程,只有一条线程在<code>执行</code>.那么为什么还会出现<code>并发</code>执行?因为CPU在快速的在多线程中快速的<code>调度</code>(切换),如果时间足够快那么就会造成多线程并发的假象。是不是线程越多就越好? </p>
 </li>
 <li><code>如果线程多到CPU切换不过来,CPU会非常消耗资源，CPU会累死，每条线程被调度到的频率大大降低,所以应该合理使用多线程</code>.  </li>
 </ul>
-<h4 id="ios程序中使用的多线程种类"><a href="#ios程序中使用的多线程种类" class="headerlink" title="ios程序中使用的多线程种类"></a>ios程序中使用的多线程种类</h4><ul>
+<h2 id="ios程序中使用的多线程种类"><a href="#ios程序中使用的多线程种类" class="headerlink" title="ios程序中使用的多线程种类"></a>ios程序中使用的多线程种类</h2><ul>
 <li>pthread:C语言,跨平台，复杂(使用较少).</li>
 <li>NSThread:面向对象，程序员管理(使用较少).</li>
 <li>GCD:利用CPU多核技术进行多线程开发(经常使用).</li>
@@ -228,20 +226,42 @@
 </ul>
 <h4 id="GCD常用函数"><a href="#GCD常用函数" class="headerlink" title="GCD常用函数"></a>GCD常用函数</h4><ul>
 <li><p>GCD分为异步函数,同步函数</p>
-</li>
-<li><p>异步函数:</p>
-</li>
-</ul>
+<ul>
+<li><p>异步函数(async):</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_async(dispatch_queue_t queue(), ^&#123;</span><br><span class="line">    //something           </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">dispatch_queue_t //可以自定义,也可以使用系统的队列</span><br><span class="line">dispatch_get_global_queue(0, 0)//全局队列 </span><br><span class="line">dispatch_get_main_queue()//主线程的主队列</span><br></pre></td></tr></table></figure>
-<ul>
-<li>异步函数 + 主队列：只在主线程中执行任务  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得主队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_main_queue();</span><br><span class="line">       </span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">  NSLog(@&quot;dispatch_async(queue, ^&#123;  	         	</span><br><span class="line">     NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<ul>
-<li>异步函数 + 并发队列：可以同时开启多条线程<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得全局的并发队列</span><br><span class="line">dispatch_queue_t queue =dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;);</span><br><span class="line"></span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">   for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<hr>
+<pre><code>- 异步函数 + 主队列：只在主线程中执行任务
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得主队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_main_queue();</span><br><span class="line">       </span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">  NSLog(@&quot;dispatch_async(queue, ^&#123;  	         	</span><br><span class="line">     NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+- 异步函数 + 并发队列：可以同时开启多条线程
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得全局的并发队列</span><br><span class="line">dispatch_queue_t queue =dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;);</span><br><span class="line"></span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">   for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+- 异步函数 + 串行队列：会开启新的线程，但是任务是串行的，执行完一个任务，再执行下一个任务
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 1.创建串行队列</span><br><span class="line">dispatch_queue_t queue = dispatch_queue_create(&quot;com.520it.queue&quot;, DISPATCH_QUEUE_SERIAL);</span><br><span class="line"></span><br><span class="line">//dispatch_queue_t queue = dispatch_queue_create(&quot;com.ialexsun.cn.queue&quot;, NULL);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+- 同步函数(sync):
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_sync(dispatch_queue_t queue(), ^&#123;</span><br><span class="line">//something           </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">dispatch_queue_t //可以自定义,也可以使用系统的队列</span><br><span class="line">dispatch_get_global_queue(0, 0)//全局队列 </span><br><span class="line">dispatch_get_main_queue()//主线程的主队列</span><br></pre></td></tr></table></figure>
+
+- 异步函数 + 主队列：只在主线程中执行任务
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得主队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_main_queue();</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+- 同步函数 + 并发队列：不会开启新的线程
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得全局的并发队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+- 同步函数 + 串行队列：不会开启新的线程，在当前线程执行任务。任务是串行的，执行完一个任务，再执行下一个任务
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 1.创建串行队列</span><br><span class="line">dispatch_queue_t queue = dispatch_queue_create(&quot;com.ialexsun.queue&quot;, DISPATCH_QUEUE_SERIAL);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</code></pre><hr>
 
       
     </div>
