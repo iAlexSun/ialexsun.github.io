@@ -232,7 +232,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="3-Runloop的内部结构"><a href="#3-Runloop的内部结构" class="headerlink" title="3.Runloop的内部结构"></a>3.Runloop的内部结构</h2><p><img src="http://ac-mcm5vzvc.clouddn.com/1225f1e6a37bef9a.png" alt=""><br>一个线程只能对应一个Runloop,可以有若干Mode,一个Mode可以若干个Timer/Observer/Source.每次只能进入一个Mode,这个Model叫做CurrentMode.如果想切换模式,一定要先退出当前Mode.</p>
+<h2 id="3-Runloop的内部结构"><a href="#3-Runloop的内部结构" class="headerlink" title="3.Runloop的内部结构"></a>3.Runloop的内部结构</h2><p><img src="http://ac-mcm5vzvc.clouddn.com/7daf2abb34432dcc.png" alt=""><br>一个线程只能对应一个Runloop,可以有若干Mode,一个Mode可以若干个Timer/Observer/Source.每次只能进入一个Mode,这个Model叫做CurrentMode.如果想切换模式,一定要先退出当前Mode.</p>
 <ul>
 <li><p>系统默认注册了5中Mode:</p>
 <ul>
@@ -257,40 +257,41 @@
 </li>
 <li><p>Source1 基于Port的，通过内核和其他线程通信，接收、分发系统事件,这种 Source 能主动唤醒 RunLoop 的线程.    </p>
 </li>
-<li><p>CFRunLoopTimerRef(定时器):CFRunLoopTimerRef是基于时间的触发器,基本上说的就是NSTimer，它受RunLoop Mode的影响。<br>// 创建一个定时器</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 		target:self selector:@selector(run) userInfo:nil 		repeats:YES];</span><br><span class="line">// NSDefaultRunLoopMode:NSTimer只有在默认模式下	(NSDefaultRunLoopMode)工作，切换到其他模式不再工作，比如拖	拽了界面上的某个控件(会切换成UITrackingRunLoopMode)</span><br><span class="line">[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];</span><br></pre></td></tr></table></figure>
+<li><p>CFRunLoopTimerRef(定时器):CFRunLoopTimerRef是基于时间的触发器,基本上说的就是NSTimer，它受RunLoop Mode的影响。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> // 创建一个定时器</span><br><span class="line">NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 		target:self selector:@selector(run) userInfo:nil 		repeats:YES];</span><br><span class="line">// NSDefaultRunLoopMode:NSTimer只有在默认模式下	(NSDefaultRunLoopMode)工作，切换到其他模式不再工作，比如拖	拽了界面上的某个控件(会切换成UITrackingRunLoopMode)</span><br><span class="line">[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 </li>
 </ul>
-<p><code>NSRunLoopCommonModes</code>仅仅是标记NSTimer在两种模式(UITrackingRunLoopMode/NSDefaultRunLoopMode)下都能运行,但一个RunLoop中同一时间内只能运行一种模式.<code>UITrackingRunLoopMode</code>拖拽UI界面时出发定时器,在默认模式(NSDefaultRunLoopMode)下不工作  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NSRunLoopCommonModes`仅仅是标记NSTimer在两种模式(UITrackingRunLoopMode/NSDefaultRunLoopMode)下都能运行,但一个RunLoop中同一时间内只能运行一种模式.`UITrackingRunLoopMode`拖拽UI界面时出发定时器,在默认模式(NSDefaultRunLoopMode)下不工作</span><br></pre></td></tr></table></figure>
+<ul>
+<li>CFRunLoopObserverRef(观察者):可以通过CFRunLoopObserverRef来监听RunLoop状态的改变<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity)&#123;</span><br><span class="line">   kCFRunLoopEntry         = (1UL &lt;&lt; 0), //状态值:1 即将进入Loop</span><br><span class="line">   kCFRunLoopBeforeTimers  = (1UL &lt;&lt; 1),//状态值:2 即将处理 Timer</span><br><span class="line">   kCFRunLoopBeforeSources = (1UL &lt;&lt; 2),//状态值:4 即将处理Source</span><br><span class="line">   kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5),//状态值:32 即将进入休眠        </span><br><span class="line">   kCFRunLoopAfterWaiting  = (1UL &lt;&lt; 6),//状态值:64 刚从休眠中唤醒</span><br><span class="line">   kCFRunLoopExit          = (1UL &lt;&lt; 7),//状态值:128 即将退出Loop</span><br><span class="line">   kCFRunLoopAllActivities = 0x0FFFFFFFU // 表示监听上面所有的状态</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<pre><code>- GCD定时器不受RunLoop Mode的影响       
-
-
-- CFRunLoopObserverRef(观察者):可以通过CFRunLoopObserverRef来监听RunLoop状态的改变
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity)&#123;</span><br><span class="line">   kCFRunLoopEntry         = (1UL &lt;&lt; 0), //状态值:1 即将进入Loop</span><br><span class="line">   kCFRunLoopBeforeTimers  = (1UL &lt;&lt; 1),//状态值:2 即将处理 Timer</span><br><span class="line">   kCFRunLoopBeforeSources = (1UL &lt;&lt; 2),//状态值:4 即将处理Source</span><br><span class="line">   kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5),//状态值:32 即将进入休眠        </span><br><span class="line">   kCFRunLoopAfterWaiting  = (1UL &lt;&lt; 6),//状态值:64 刚从休眠中唤醒</span><br><span class="line">   kCFRunLoopExit          = (1UL &lt;&lt; 7),//状态值:128 即将退出Loop</span><br><span class="line">   kCFRunLoopAllActivities = 0x0FFFFFFFU // 表示监听上面所有的状态</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
 <p>可以通过以下代码测试RunLoop状态发生改变对应的状态值:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CFRunLoopObserverRef observer =CFRunLoopObserverCreateWithHandler(CFAllocatorGetDefault(), kCFRunLoopAllActivities, YES, 0, ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) &#123;</span><br><span class="line">     NSLog(@&quot;----RunLoop状态发生改变---%zd&quot;, activity);</span><br><span class="line"> &#125;);</span><br></pre></td></tr></table></figure></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CFRunLoopAddObserver(CFRunLoopGetCurrent(),observer,</span><br><span class="line">kCFRunLoopDefaultMode);</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CFRelease(observer); //观察者要手动释放</span><br></pre></td></tr></table></figure>
-<h2 id="PS-看iOS线下分享Runloop深入了解的时候-大家讨论为什么状态为什么会没有3和4-是不是被官方干掉了！仅供娱乐-哪位了解到可以给我留言"><a href="#PS-看iOS线下分享Runloop深入了解的时候-大家讨论为什么状态为什么会没有3和4-是不是被官方干掉了！仅供娱乐-哪位了解到可以给我留言" class="headerlink" title="PS:看iOS线下分享Runloop深入了解的时候,大家讨论为什么状态为什么会没有3和4,是不是被官方干掉了！仅供娱乐,哪位了解到可以给我留言."></a>PS:看<a href="http://v.youku.com/v_show/id_XODgxODkzODI0.html" target="_blank" rel="external">iOS线下分享Runloop深入了解</a>的时候,大家讨论为什么状态为什么会没有3和4,是不是被官方干掉了！仅供娱乐,哪位了解到可以给我留言.</h2><p>上面是Mode中必须包含的元素,Source/Timer/Observer可以都有,也可以只有一个,如果一个都没有会直接退出Runloop状态,不进入循环。</p>
-<h2 id="4-Runloop处理顺序"><a href="#4-Runloop处理顺序" class="headerlink" title="4.Runloop处理顺序"></a>4.Runloop处理顺序</h2><p>官方:<img src="http://ac-mcm5vzvc.clouddn.com/71dcdcc1700cbf57.png" alt=""></p>
-<p>网友提供(易于理解)<img src="http://ac-mcm5vzvc.clouddn.com/aca3b3048554be28.png" alt=""></p>
+<p>上面是Mode中必须包含的元素,Source/Timer/Observer可以都有,也可以只有一个,如果一个都没有会直接退出Runloop状态,不进入循环。</p>
+<h4 id="PS-看iOS线下分享Runloop深入了解的时候-大家讨论为什么状态为什么会没有3和4-是不是被官方干掉了！仅供娱乐-哪位了解到可以给我留言"><a href="#PS-看iOS线下分享Runloop深入了解的时候-大家讨论为什么状态为什么会没有3和4-是不是被官方干掉了！仅供娱乐-哪位了解到可以给我留言" class="headerlink" title="PS:看iOS线下分享Runloop深入了解的时候,大家讨论为什么状态为什么会没有3和4,是不是被官方干掉了！仅供娱乐,哪位了解到可以给我留言."></a>PS:看<a href="http://v.youku.com/v_show/id_XODgxODkzODI0.html" target="_blank" rel="external">iOS线下分享Runloop深入了解</a>的时候,大家讨论为什么状态为什么会没有3和4,是不是被官方干掉了！仅供娱乐,哪位了解到可以给我留言.</h4><h2 id="4-Runloop处理顺序"><a href="#4-Runloop处理顺序" class="headerlink" title="4.Runloop处理顺序"></a>4.Runloop处理顺序</h2><p>官方提供:<img src="http://ac-mcm5vzvc.clouddn.com/4671e9e78cd86ee1.png" alt=""></p>
+<p>网友提供(易于理解):<img src="http://ac-mcm5vzvc.clouddn.com/6d40150bdeb3e504.png" alt=""></p>
 <p>上图是Runloop处理顺序,可以看到，实际上 RunLoop 就是这样一个函数，其内部是一个 do-while 循环。当你调用 CFRunLoopRun() 时，线程就会一直停留在这个循环里；直到超时或被手动停止，该函数才会返回。</p>
 <h2 id="5-Runloop实际应用"><a href="#5-Runloop实际应用" class="headerlink" title="5.Runloop实际应用"></a>5.Runloop实际应用</h2><ul>
-<li><p>ImageView显示:图片刷新(假如界面要刷新N多图片(渲染)，此时用户拖拽UI控件就会出现卡的效果,可以通过RunLoop实现)</p>
+<li>ImageView显示:图片刷新(假如界面要刷新N多图片(渲染)，此时用户拖拽UI控件就会出现卡的效果,可以通过RunLoop实现)</li>
+</ul>
 <pre><code class="{bash}">[self.myImageView performSelector:@selector(setImage:) withObject:[UIImage imageNamed:@&quot;0&quot;] afterDelay:2.0 inModes:@[NSDefaultRunLoopMode]];
 </code></pre>
-</li>
-<li><p>常驻线程:(让子线程不进入消亡状态,等待其他线程发来消息,子线程中加入RunLoop+Source/Timer/Observer)</p>
+<ul>
+<li>常驻线程:(让子线程不进入消亡状态,等待其他线程发来消息,子线程中加入RunLoop+Source/Timer/Observer)</li>
+</ul>
 <pre><code class="{bash}">[[NSRunLoop currentRunLoop] addPort:[NSPort port] forMode:NSDefaultRunLoopMode];
 [[NSRunLoop currentRunLoop] run];
 </code></pre>
-</li>
-<li><p>自动释放池:释放池在Runloop睡眠前等待唤醒前是释放一次,进入下一次Runloop循环的时候又创建一次.创建子线程外面要有一个大的Runloop包住.</p>
-</li>
+<ul>
+<li>自动释放池:释放池在Runloop睡眠前等待唤醒前是释放一次,进入下一次Runloop循环的时候又创建一次.创建子线程外面要有一个大的Runloop包住.</li>
 </ul>
+<p>友情链接:<a href="http://blog.ibireme.com/2015/05/18/runloop/" target="_blank" rel="external">深入理解RunLoop</a></p>
 
       
     </div>
