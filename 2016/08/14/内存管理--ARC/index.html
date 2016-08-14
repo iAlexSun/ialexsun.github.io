@@ -1,0 +1,698 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ARC," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="前言
+由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!
+ARC是什么
+ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM编译器中设置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="了解内存管理--ARC（一）">
+<meta property="og:url" content="http://yoursite.com/2016/08/14/内存管理--ARC/index.html">
+<meta property="og:site_name" content="iAlexSun's Blog">
+<meta property="og:description" content="前言
+由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!
+ARC是什么
+ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM编译器中设置">
+<meta property="og:updated_time" content="2016-08-14T14:41:30.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="了解内存管理--ARC（一）">
+<meta name="twitter:description" content="前言
+由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!
+ARC是什么
+ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM编译器中设置">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 6315560190624138000,
+      author: 'ialexsun'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/08/14/内存管理--ARC/"/>
+
+  <title> 了解内存管理--ARC（一） | iAlexSun's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">iAlexSun's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Keep Heart</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://ialexsun.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/resume" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                了解内存管理--ARC（一）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-14T10:38:27+08:00" content="2016-08-14">
+              2016-08-14
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/08/14/内存管理--ARC/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/14/内存管理--ARC/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><hr>
+<p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!</p>
+<h3 id="ARC是什么"><a href="#ARC是什么" class="headerlink" title="ARC是什么"></a>ARC是什么</h3><hr>
+<p>ARC是<code>(Automatic Reference Counting)</code>的缩写。就是自动引用计数,在LLVM编译器中设置ARC为有效状态，就无需再次键入retian或者release代码。</p>
+<p>官方文档介绍ARC:</p>
+<blockquote>
+<p>在Objective-C中采用ARC机制，让编译器来进行内存管理。在新一代Apple LLVM 编译器中设置ARC为有效状态，就无需再次键入retain或者release代码，这在降低程序崩溃、内存泄漏等风险的同时，很大程度上减小了开发程序的工作量。编译器完全清楚目标对象，并能立刻释放那些不再被使用的对象。如此一来，应用程序将具有可预测性，且能流畅运行，速度也将大幅度提升。</p>
+</blockquote>
+<h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><hr>
+<p>那我们简单了解一下什么是引用计数,在iOS 5在WWDC中引入了自动计数功能,也就是说在iOS 5时代之前只有经历过的人才知道那是多么痛苦的事情（虽然我没有经历过)。</p>
+<ul>
+<li><p>在MRC模式下我们需要考虑对象的释放和增加,生成对象的时候它会有一个引用计数,可以增加1，也可以减少1.当引用计数为0的时候就会释放对象.</p>
+</li>
+<li><p>在ARC模式下简单的来说就是就无需手动键入retian或者release代码,有编译器为你自动管理引用计数功能.我们不能手动retain/release来管理释放，必须交给自动释放池来管理。ARC能够解决大部分的内存泄露问题，但是有很多问题应该注意，如循环引用.</p>
+</li>
+</ul>
+<p>如果想了解深入了解retain和release原理可以浏览<a href="http://draveness.me/rr/" target="_blank" rel="external">黑箱中的 retain 和 release</a></p>
+<h3 id="autoreleasepool-—-自动释放池"><a href="#autoreleasepool-—-自动释放池" class="headerlink" title="autoreleasepool — 自动释放池"></a>autoreleasepool — 自动释放池</h3><hr>
+<p>因为有<code>autoreleasepool</code>你猜可以不用考滤内存管理,可能在你不注意的时候会有<code>main</code>函数中就有一个大的自动释放池.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, char * argv[]) &#123;  </span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意:整个应用程序都被包括在自动释放池中的Block中,也会涉及到Runloop的相关知识,如果你想了解Runloop相关知识请猛戳<a href="http://ialexsun.cn/2016/07/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E4%BA%86%E8%A7%A3Runloop/" target="_blank" rel="external">深入浅出了解Runloop</a>文中会详细介绍关于Runloop如何在autoreleasepool中应用的.</p>
+<hr>
+<p>回到主话题自动释放池,让我们看一下经过编译器改写的这段代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct __AtAutoreleasePool &#123;  </span><br><span class="line">  __AtAutoreleasePool() &#123;atautoreleasepoolobj = objc_autoreleasePoolPush();&#125;</span><br><span class="line">  ~__AtAutoreleasePool() &#123;objc_autoreleasePoolPop(atautoreleasepoolobj);&#125;</span><br><span class="line">  void * atautoreleasepoolobj;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>你会发现这个结构体中会有<code>objc_autoreleasePoolPush</code> <code>objc_autoreleasePoolPop</code>两个方法，那我们可以推测出来,<br>在<code>main</code>函数中<code>@autoreleasepool</code>只是通过上述的两个方法来进行工作的.如果想深入了解一下这两个方法.那我们就读一读这篇文章吧。<a href="http://ialexsun.cn/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/" target="_blank" rel="external">内存管理–AutoreleasePool（二）</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ARC/" rel="tag">#ARC</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/11/离屏渲染的优化/" rel="next" title="离屏渲染的性能优化">
+                <i class="fa fa-chevron-left"></i> 离屏渲染的性能优化
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/08/14/内存管理--AutoreleasePool/" rel="prev" title="内存管理--AutoreleasePool（二）">
+                内存管理--AutoreleasePool（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/08/14/内存管理--ARC/"
+           data-title="了解内存管理--ARC（一）" data-url="http://yoursite.com/2016/08/14/内存管理--ARC/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ac-mcm5vzvc.clouddn.com/dc39645a737220b1.png"
+               alt="iAlexSun" />
+          <p class="site-author-name" itemprop="name">iAlexSun</p>
+          <p class="site-description motion-element" itemprop="description">Welecome To iAlexSun's Blog。我是孙文（@iAlexSun）, 现在是一名大三的学生，同时极度热爱iOS开发。爱好旅行，追求自由、随性的生活方式。</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iAlexSun" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://bestswifter.com/" title="bestswifter" target="_blank">bestswifter</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://draveness.me/" title="draveness" target="_blank">draveness</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://desgard.com/" title="desgard" target="_blank">desgard</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://blog.sunnyxx.com/" title="sunnyxx" target="_blank">sunnyxx</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://blog.ibireme.com/" title="ibireme" target="_blank">ibireme</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARC是什么"><span class="nav-number">2.</span> <span class="nav-text">ARC是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引用计数"><span class="nav-number">3.</span> <span class="nav-text">引用计数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#autoreleasepool-—-自动释放池"><span class="nav-number">4.</span> <span class="nav-text">autoreleasepool — 自动释放池</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iAlexSun</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"ialexsun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
