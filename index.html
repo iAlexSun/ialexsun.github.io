@@ -904,16 +904,17 @@
 <h2 id="Runloop实际应用"><a href="#Runloop实际应用" class="headerlink" title="Runloop实际应用"></a>Runloop实际应用</h2><ul>
 <li>ImageView显示:图片刷新(假如界面要刷新N多图片(渲染)，此时用户拖拽UI控件就会出现卡的效果,可以通过RunLoop实现)</li>
 </ul>
-<pre><code class="{bash}">[self.myImageView performSelector:@selector(setImage:) withObject:[UIImage imageNamed:@&quot;0&quot;] afterDelay:2.0 inModes:@[NSDefaultRunLoopMode]];
-</code></pre>
-<ul>
+<pre><code>[self.myImageView performSelector:@selector(setImage:) withObject:[UIImage imageNamed:@&quot;0&quot;] afterDelay:2.0 inModes:@[NSDefaultRunLoopMode]];
+</code></pre><ul>
 <li>常驻线程:(让子线程不进入消亡状态,等待其他线程发来消息,子线程中加入RunLoop+Source/Timer/Observer)</li>
 </ul>
-<pre><code class="{bash}">[[NSRunLoop currentRunLoop] addPort:[NSPort port] forMode:NSDefaultRunLoopMode];
+<pre><code>[[NSRunLoop currentRunLoop] addPort:[NSPort port] forMode:NSDefaultRunLoopMode];
 [[NSRunLoop currentRunLoop] run];
-</code></pre>
-<ul>
-<li>自动释放池:释放池在Runloop睡眠前等待唤醒前是释放一次,进入下一次Runloop循环的时候又创建一次.创建子线程外面要有一个大的Runloop包住.</li>
+</code></pre><ul>
+<li>自动释放池:释放池在Runloop睡眠前等待唤醒前是释放一次,进入下一次Runloop循环的时候又创建一次.创建子线程外面要有一个大的Runloop包住.<ul>
+<li>自动释放池的原理:实际上因为<code>AutoreleasePool</code>会调用<code>objc_autoreleasePoolPop ``objc_autoreleasePoolPush</code>方法。<a href="http://ialexsun.cn/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/" target="_blank" rel="external">自动释放池的原理深入了解</a></li>
+</ul>
+</li>
 </ul>
 <p>友情链接:<a href="http://blog.ibireme.com/2015/05/18/runloop/" target="_blank" rel="external">深入理解RunLoop</a></p>
 
