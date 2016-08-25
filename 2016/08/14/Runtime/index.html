@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="ARC," />
+  <meta name="keywords" content="Runtime," />
 
 
 
@@ -84,25 +84,19 @@
 
 
 
-<meta name="description" content="前言
-由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!
-ARC是什么
-ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM编译器中设置">
+<meta name="description" content="Objective-C的由来
+其实这套语言并不是苹果原声的语言,是乔帮主离开苹果在NextStep组建的一个加强小分队带来的一门语言,非常的强悍，到今天为止大约有了将近30年多年的历史.但是Objective-C是一个门非常奇怪的语言,为什么这么说呢,以为大家都感觉OC的语法十分的”特别”.我慢慢也才习惯这样的语法。但是Objective-C也有它的优点那就是其他语言没有的运行时，也就是我们常常说">
 <meta property="og:type" content="article">
-<meta property="og:title" content="了解内存管理--ARC（一）">
-<meta property="og:url" content="http://yoursite.com/2016/08/14/内存管理--ARC/index.html">
+<meta property="og:title" content="你应该了解的运行时--Runtime">
+<meta property="og:url" content="http://yoursite.com/2016/08/14/Runtime/index.html">
 <meta property="og:site_name" content="iAlexSun's Blog">
-<meta property="og:description" content="前言
-由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!
-ARC是什么
-ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM编译器中设置">
-<meta property="og:updated_time" content="2016-08-14T14:41:30.000Z">
+<meta property="og:description" content="Objective-C的由来
+其实这套语言并不是苹果原声的语言,是乔帮主离开苹果在NextStep组建的一个加强小分队带来的一门语言,非常的强悍，到今天为止大约有了将近30年多年的历史.但是Objective-C是一个门非常奇怪的语言,为什么这么说呢,以为大家都感觉OC的语法十分的”特别”.我慢慢也才习惯这样的语法。但是Objective-C也有它的优点那就是其他语言没有的运行时，也就是我们常常说">
+<meta property="og:updated_time" content="2016-08-20T13:44:46.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="了解内存管理--ARC（一）">
-<meta name="twitter:description" content="前言
-由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!
-ARC是什么
-ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM编译器中设置">
+<meta name="twitter:title" content="你应该了解的运行时--Runtime">
+<meta name="twitter:description" content="Objective-C的由来
+其实这套语言并不是苹果原声的语言,是乔帮主离开苹果在NextStep组建的一个加强小分队带来的一门语言,非常的强悍，到今天为止大约有了将近30年多年的历史.但是Objective-C是一个门非常奇怪的语言,为什么这么说呢,以为大家都感觉OC的语法十分的”特别”.我慢慢也才习惯这样的语法。但是Objective-C也有它的优点那就是其他语言没有的运行时，也就是我们常常说">
 
 
 
@@ -123,9 +117,9 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/08/14/内存管理--ARC/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/08/14/Runtime/"/>
 
-  <title> 了解内存管理--ARC（一） | iAlexSun's Blog </title>
+  <title> 你应该了解的运行时--Runtime | iAlexSun's Blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -245,7 +239,7 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
             
             
               
-                了解内存管理--ARC（一）
+                你应该了解的运行时--Runtime
               
             
           </h1>
@@ -257,7 +251,7 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-14T10:38:27+08:00" content="2016-08-14">
+            <time itemprop="dateCreated" datetime="2016-08-14T22:38:27+08:00" content="2016-08-14">
               2016-08-14
             </time>
           </span>
@@ -287,8 +281,8 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/08/14/内存管理--ARC/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/14/内存管理--ARC/" itemprop="commentsCount"></span>
+                <a href="/2016/08/14/Runtime/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/14/Runtime/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -311,31 +305,19 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
       
 
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><hr>
-<p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!</p>
-<h3 id="ARC是什么"><a href="#ARC是什么" class="headerlink" title="ARC是什么"></a>ARC是什么</h3><hr>
-<p>ARC是<code>(Automatic Reference Counting)</code>的缩写。就是自动引用计数,在LLVM编译器中设置ARC为有效状态，就无需再次键入retian或者release代码。</p>
-<p>官方文档介绍ARC:</p>
-<blockquote>
-<p>在Objective-C中采用ARC机制，让编译器来进行内存管理。在新一代Apple LLVM 编译器中设置ARC为有效状态，就无需再次键入retain或者release代码，这在降低程序崩溃、内存泄漏等风险的同时，很大程度上减小了开发程序的工作量。编译器完全清楚目标对象，并能立刻释放那些不再被使用的对象。如此一来，应用程序将具有可预测性，且能流畅运行，速度也将大幅度提升。</p>
-</blockquote>
-<h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><hr>
-<p>那我们简单了解一下什么是引用计数,在iOS 5在WWDC中引入了自动计数功能,也就是说在iOS 5时代之前只有经历过的人才知道那是多么痛苦的事情（虽然我没有经历过)。</p>
+        <h3 id="Objective-C的由来"><a href="#Objective-C的由来" class="headerlink" title="Objective-C的由来"></a>Objective-C的由来</h3><hr>
+<p>其实这套语言并不是苹果原声的语言,是乔帮主离开苹果在NextStep组建的一个加强小分队带来的一门语言,非常的强悍，到今天为止大约有了将近30年多年的历史.但是Objective-C是一个门非常奇怪的语言,为什么这么说呢,以为大家都感觉OC的语法十分的”特别”.我慢慢也才习惯这样的语法。但是Objective-C也有它的优点那就是其他语言没有的<code>运行时</code>，也就是我们常常说的Runtime，这个东西不需要你去管理，但是如果你了解了关于OC底层的知识会对编程有一个更高层次的看法，废话不多说，直接看看Runtime是个什么玩意这么牛X;</p>
+<h3 id="Runtime的前世今生"><a href="#Runtime的前世今生" class="headerlink" title="Runtime的前世今生"></a>Runtime的前世今生</h3><hr>
+<p>以下会把Objective-C简称为OC,它是基于C语言，但是加入和面向对象的特性，而后扩展的核心就是一个用C和编译语言写的Runtime库。它是OC面相对象和动态运行的基石，，如果你想了解OC那就先了解Runtime，如果你想了解Runtime，那就要了解它的核心 - 消息传递机制;</p>
+<h3 id="消息传递（Messaging）"><a href="#消息传递（Messaging）" class="headerlink" title="消息传递（Messaging）"></a>消息传递（Messaging）</h3><hr>
+<p>很多语言中并不是使用了这个机制，因为调用一个方法就是调到内存中的某一点并且开始执行代码。但是这个机制并不会这样做，<code>[object foo]</code> 语法并不会立即执行 <code>foo</code> 这个方法的代码.你肯定会问那会怎么做，别着急啊。听我慢慢讲，它会在运行时把object发送一条叫foo的消息。OC函数调用的语法都会被翻译成一个C语言的函数<code>objc_msgSend()</code>，消息传递隐藏在<code>objc_object</code>中isa指针和`objc_class中class dispatch table。</p>
+<h3 id="objc-object-objc-class-以及-Ojbc-method"><a href="#objc-object-objc-class-以及-Ojbc-method" class="headerlink" title="objc _ object, objc_class 以及 Ojbc _method"></a>objc _ object, objc_class 以及 Ojbc _method</h3><hr>
+<p>在OC中类，对象和方法都是一个C的结构体,从objc/objc.h头文件中可以看到如下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">struct objc_object &#123;  </span><br><span class="line">    Class isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct objc_class &#123;  </span><br><span class="line">    Class isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">#if !__OBJC2__</span><br><span class="line">    Class super_class;</span><br><span class="line">    const char *name;</span><br><span class="line">    long version;</span><br><span class="line">    long info;</span><br><span class="line">    long instance_size;</span><br><span class="line">    struct objc_ivar_list *ivars;</span><br><span class="line">    **struct objc_method_list **methodLists**;</span><br><span class="line">    **struct objc_cache *cache**;</span><br><span class="line">    struct objc_protocol_list *protocols;</span><br><span class="line">#endif</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct objc_method_list &#123;  </span><br><span class="line">    struct objc_method_list *obsolete;</span><br><span class="line">    int method_count;</span><br><span class="line"></span><br><span class="line">#ifdef __LP64__</span><br><span class="line">    int space;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    /* variable length structure */</span><br><span class="line">    struct objc_method method_list[1];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct objc_method &#123;  </span><br><span class="line">    SEL method_name;</span><br><span class="line">    char *method_types; /* a string representing argument/return types */</span><br><span class="line">    IMP method_imp;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在这些定义中可以看出发送一条消息也就<code>objc_msgSend</code>做了什么是。例如<code>objc_msgSend(obj, foo)</code>这个例子:</p>
 <ul>
-<li><p>在MRC模式下我们需要考虑对象的释放和增加,生成对象的时候它会有一个引用计数,可以增加1，也可以减少1.当引用计数为0的时候就会释放对象.</p>
-</li>
-<li><p>在ARC模式下简单的来说就是就无需手动键入retian或者release代码,有编译器为你自动管理引用计数功能.我们不能手动retain/release来管理释放，必须交给自动释放池来管理。ARC能够解决大部分的内存泄露问题，但是有很多问题应该注意，如循环引用.</p>
-</li>
+<li>从obj的isa指针去找到它的class;</li>
 </ul>
-<p>如果想了解深入了解retain和release原理可以浏览<a href="http://draveness.me/rr/" target="_blank" rel="external">黑箱中的 retain 和 release</a></p>
-<h3 id="autoreleasepool-—-自动释放池"><a href="#autoreleasepool-—-自动释放池" class="headerlink" title="autoreleasepool — 自动释放池"></a>autoreleasepool — 自动释放池</h3><hr>
-<p>因为有<code>autoreleasepool</code>你猜可以不用考滤内存管理,可能在你不注意的时候会有<code>main</code>函数中就有一个大的自动释放池.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, char * argv[]) &#123;  </span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>注意:整个应用程序都被包括在自动释放池中的Block中,也会涉及到Runloop的相关知识,如果你想了解Runloop相关知识请猛戳<a href="http://ialexsun.cn/2016/07/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E4%BA%86%E8%A7%A3Runloop/" target="_blank" rel="external">深入浅出了解Runloop</a>文中会详细介绍关于Runloop如何在autoreleasepool中应用的.</p>
-<hr>
-<p>回到主话题自动释放池,让我们看一下经过编译器改写的这段代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct __AtAutoreleasePool &#123;  </span><br><span class="line">  __AtAutoreleasePool() &#123;atautoreleasepoolobj = objc_autoreleasePoolPush();&#125;</span><br><span class="line">  ~__AtAutoreleasePool() &#123;objc_autoreleasePoolPop(atautoreleasepoolobj);&#125;</span><br><span class="line">  void * atautoreleasepoolobj;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>你会发现这个结构体中会有<code>objc_autoreleasePoolPush</code> <code>objc_autoreleasePoolPop</code>两个方法，那我们可以推测出来,<br>在<code>main</code>函数中<code>@autoreleasepool</code>只是通过上述的两个方法来进行工作的.如果想深入了解一下这两个方法.那我们就读一读这篇文章吧。<a href="http://ialexsun.cn/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/" target="_blank" rel="external">内存管理–AutoreleasePool（二）</a></p>
 
       
     </div>
@@ -358,7 +340,7 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
       
         <div class="post-tags">
           
-            <a href="/tags/ARC/" rel="tag">#ARC</a>
+            <a href="/tags/Runtime/" rel="tag">#Runtime</a>
           
         </div>
       
@@ -367,17 +349,13 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/08/11/离屏渲染的优化/" rel="next" title="离屏渲染的性能优化">
-                <i class="fa fa-chevron-left"></i> 离屏渲染的性能优化
+              <a href="/2016/08/14/内存管理--AutoreleasePool/" rel="next" title="内存管理--AutoreleasePool（二）">
+                <i class="fa fa-chevron-left"></i> 内存管理--AutoreleasePool（二）
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/08/14/内存管理--AutoreleasePool/" rel="prev" title="内存管理--AutoreleasePool（二）">
-                内存管理--AutoreleasePool（二） <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -403,8 +381,8 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/08/14/内存管理--ARC/"
-           data-title="了解内存管理--ARC（一）" data-url="http://yoursite.com/2016/08/14/内存管理--ARC/">
+      <div class="ds-thread" data-thread-key="2016/08/14/Runtime/"
+           data-title="你应该了解的运行时--Runtime" data-url="http://yoursite.com/2016/08/14/Runtime/">
       </div>
     
   </div>
@@ -536,7 +514,7 @@ ARC是(Automatic Reference Counting)的缩写。就是自动引用计数,在LLVM
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARC是什么"><span class="nav-number">2.</span> <span class="nav-text">ARC是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引用计数"><span class="nav-number">3.</span> <span class="nav-text">引用计数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#autoreleasepool-—-自动释放池"><span class="nav-number">4.</span> <span class="nav-text">autoreleasepool — 自动释放池</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Objective-C的由来"><span class="nav-number">1.</span> <span class="nav-text">Objective-C的由来</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Runtime的前世今生"><span class="nav-number">2.</span> <span class="nav-text">Runtime的前世今生</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息传递（Messaging）"><span class="nav-number">3.</span> <span class="nav-text">消息传递（Messaging）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#objc-object-objc-class-以及-Ojbc-method"><span class="nav-number">4.</span> <span class="nav-text">objc _ object, objc_class 以及 Ojbc _method</span></a></li></ol></div>
             
           </div>
         </section>
