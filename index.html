@@ -238,6 +238,161 @@
             
               
                 
+                <a class="post-title-link" href="/2017/01/18/仿写Keep登录页/" itemprop="url">
+                  仿写Keep登录页视频播放
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-01-18T20:18:27+08:00" content="2017-01-18">
+              2017-01-18
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/01/18/仿写Keep登录页/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/18/仿写Keep登录页/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>###前言</p>
+<p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
+<hr>
+<p>大家可以看一下效果图如下:</p>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif" alt=""></p>
+<p>###准备工作<br>iOS9之前，iOS播放视频文件一般使用 MPMoviePlayerViewController。其实实现方式非常容易就是想使用上述方式。</p>
+<ul>
+<li>要包含#import头文件和MediaPlayer.framework。</li>
+<li>应该准备一个视频文件,文件尽量小一些,最好为mp4格式(文件太太占用App的太多影响用户体验)。</li>
+<li>一个存储视频的Plist文件方便后面加载.<br><img src="http://ac-mcm5vzvc.clouddn.com/9588ec9f1b0bdc928140.png" alt=""></li>
+</ul>
+<p>###实现过程<br>首先我们应该讲视频文件中对应的信息都取出来放在对应的Model中,如果后面我们需要更改视频或者不循环播放等方式都可以直接修改Plist文件不修改任何代码,是不是很爽的样子。</p>
+<ul>
+<li>我们创建一个Model来存储对应信息.我们将信息取出来后,实现他们对应的类方法。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+(NSDictionary *)getUrlInfo;</span><br><span class="line">+(NSString *)getVideoUrl;</span><br><span class="line">+(NSString *)getVideoType;</span><br><span class="line">+(BOOL)getLoopMode;</span><br></pre></td></tr></table></figure>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/6895be146d70d3a027fa.png" alt=""></p>
+<p>到了最关键的一步就是加载这些文件,在最开始判断是否能够加载到这个视频的信息。</p>
+<ul>
+<li>如果有这个视频信息，就准备加载.</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> -(void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    if ([STLVideoFunctions getUrlInfo] != nil) &#123;</span><br><span class="line">        self.isLoop = [STLVideoFunctions getLoopMode];</span><br><span class="line">        </span><br><span class="line">        [self preparePlayback];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>加载视频和设置一些播放视频的属性添加到UIView上:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- (void)preparePlayback &#123;</span><br><span class="line">    if (self.player == nil) &#123;</span><br><span class="line">        NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:[STLVideoFunctions getVideoUrl] ofType:[STLVideoFunctions getVideoType]]];</span><br><span class="line">        </span><br><span class="line">        self.player = [[MPMoviePlayerController alloc] initWithContentURL:url];</span><br><span class="line">        [self.player setControlStyle:MPMovieControlStyleNone];</span><br><span class="line">        [self.player prepareToPlay];</span><br><span class="line">        [self.player.view setFrame:self.view.frame];</span><br><span class="line">        [self.view addSubview:self.player.view];</span><br><span class="line">        [self.view sendSubviewToBack:self.player.view];</span><br><span class="line">        self.player.scalingMode = MPMovieScalingModeAspectFill;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在出现之前发送通知就是控制视频播放和一些控制播放方式</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillAppear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillAppear:animated];</span><br><span class="line">    </span><br><span class="line">    [self getPlayerNotifications];</span><br><span class="line">    </span><br><span class="line">    [self.player play];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//发送通知改变播放方式</span><br><span class="line">- (void)getPlayerNotifications &#123;</span><br><span class="line"></span><br><span class="line">    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayerStateChangeNotification:) name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (void)moviePlayerStateChangeNotification:(NSNotification *)notification &#123;</span><br><span class="line">    </span><br><span class="line">    MPMoviePlayerController *moviePlayer = notification.object;</span><br><span class="line">    MPMoviePlaybackState playbackState = moviePlayer.playbackState;</span><br><span class="line">    </span><br><span class="line">    switch (playbackState) &#123;</span><br><span class="line">        case MPMoviePlaybackStatePaused:</span><br><span class="line">        case MPMoviePlaybackStateStopped:</span><br><span class="line">        case MPMoviePlaybackStateInterrupted:&#123;</span><br><span class="line">            </span><br><span class="line">            if (self.isLoop) &#123;</span><br><span class="line">                moviePlayer.controlStyle = MPMovieControlStyleNone;</span><br><span class="line">                [self.player play];</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            break;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">        default:</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在视图消失后视频暂停播放，移除通知即可</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)viewDidDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewDidDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [self.player pause];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<p>一个仿照Keep登录页的实现思路大概就是这样，非常的简单。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/01/17/函数式响应式编程入门--ReactiveCocoa和MVVM/" itemprop="url">
                   函数式响应式编程入门 -- ReactiveCocoa和MVVM
                 </a>
@@ -1510,161 +1665,6 @@
 <p>解决办法:在stackoverflow搜索的方法添加一段build phase在程序中可以解决</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">APP_PATH=&quot;$&#123;TARGET_BUILD_DIR&#125;/$&#123;WRAPPER_NAME&#125;&quot;</span><br><span class="line"></span><br><span class="line"># This script loops through the frameworks embedded in the application and</span><br><span class="line"># removes unused architectures.</span><br><span class="line">find &quot;$APP_PATH&quot; -name &apos;*.framework&apos; -type d | while read -r FRAMEWORK</span><br><span class="line">do</span><br><span class="line">FRAMEWORK_EXECUTABLE_NAME=$(defaults read &quot;$FRAMEWORK/Info.plist&quot; CFBundleExecutable)</span><br><span class="line">FRAMEWORK_EXECUTABLE_PATH=&quot;$FRAMEWORK/$FRAMEWORK_EXECUTABLE_NAME&quot;</span><br><span class="line">echo &quot;Executable is $FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line"></span><br><span class="line">EXTRACTED_ARCHS=()</span><br><span class="line"></span><br><span class="line">for ARCH in $ARCHS</span><br><span class="line">do</span><br><span class="line">echo &quot;Extracting $ARCH from $FRAMEWORK_EXECUTABLE_NAME&quot;</span><br><span class="line">lipo -extract &quot;$ARCH&quot; &quot;$FRAMEWORK_EXECUTABLE_PATH&quot; -o &quot;$FRAMEWORK_EXECUTABLE_PATH-$ARCH&quot;</span><br><span class="line">EXTRACTED_ARCHS+=(&quot;$FRAMEWORK_EXECUTABLE_PATH-$ARCH&quot;)</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo &quot;Merging extracted architectures: $&#123;ARCHS&#125;&quot;</span><br><span class="line">lipo -o &quot;$FRAMEWORK_EXECUTABLE_PATH-merged&quot; -create &quot;$&#123;EXTRACTED_ARCHS[@]&#125;&quot;</span><br><span class="line">rm &quot;$&#123;EXTRACTED_ARCHS[@]&#125;&quot;</span><br><span class="line"></span><br><span class="line">echo &quot;Replacing original executable with thinned version&quot;</span><br><span class="line">rm &quot;$FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line">mv &quot;$FRAMEWORK_EXECUTABLE_PATH-merged&quot; &quot;$FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line"></span><br><span class="line">done</span><br></pre></td></tr></table></figure>
 <hr>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/01/18/仿写Keep登录页/" itemprop="url">
-                  仿写Keep登录页视频播放
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-01-18T20:18:27+08:00" content="2016-01-18">
-              2016-01-18
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/01/18/仿写Keep登录页/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/18/仿写Keep登录页/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>###前言</p>
-<p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
-<hr>
-<p>大家可以看一下效果图如下:</p>
-<p><img src="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif" alt=""></p>
-<p>###准备工作<br>iOS9之前，iOS播放视频文件一般使用 MPMoviePlayerViewController。其实实现方式非常容易就是想使用上述方式。</p>
-<ul>
-<li>要包含#import头文件和MediaPlayer.framework。</li>
-<li>应该准备一个视频文件,文件尽量小一些,最好为mp4格式(文件太太占用App的太多影响用户体验)。</li>
-<li>一个存储视频的Plist文件方便后面加载.<br><img src="http://ac-mcm5vzvc.clouddn.com/9588ec9f1b0bdc928140.png" alt=""></li>
-</ul>
-<p>###实现过程<br>首先我们应该讲视频文件中对应的信息都取出来放在对应的Model中,如果后面我们需要更改视频或者不循环播放等方式都可以直接修改Plist文件不修改任何代码,是不是很爽的样子。</p>
-<ul>
-<li>我们创建一个Model来存储对应信息.我们将信息取出来后,实现他们对应的类方法。</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+(NSDictionary *)getUrlInfo;</span><br><span class="line">+(NSString *)getVideoUrl;</span><br><span class="line">+(NSString *)getVideoType;</span><br><span class="line">+(BOOL)getLoopMode;</span><br></pre></td></tr></table></figure>
-<p><img src="http://ac-mcm5vzvc.clouddn.com/6895be146d70d3a027fa.png" alt=""></p>
-<p>到了最关键的一步就是加载这些文件,在最开始判断是否能够加载到这个视频的信息。</p>
-<ul>
-<li>如果有这个视频信息，就准备加载.</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> -(void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    if ([STLVideoFunctions getUrlInfo] != nil) &#123;</span><br><span class="line">        self.isLoop = [STLVideoFunctions getLoopMode];</span><br><span class="line">        </span><br><span class="line">        [self preparePlayback];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>加载视频和设置一些播放视频的属性添加到UIView上:</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- (void)preparePlayback &#123;</span><br><span class="line">    if (self.player == nil) &#123;</span><br><span class="line">        NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:[STLVideoFunctions getVideoUrl] ofType:[STLVideoFunctions getVideoType]]];</span><br><span class="line">        </span><br><span class="line">        self.player = [[MPMoviePlayerController alloc] initWithContentURL:url];</span><br><span class="line">        [self.player setControlStyle:MPMovieControlStyleNone];</span><br><span class="line">        [self.player prepareToPlay];</span><br><span class="line">        [self.player.view setFrame:self.view.frame];</span><br><span class="line">        [self.view addSubview:self.player.view];</span><br><span class="line">        [self.view sendSubviewToBack:self.player.view];</span><br><span class="line">        self.player.scalingMode = MPMovieScalingModeAspectFill;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>在出现之前发送通知就是控制视频播放和一些控制播放方式</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillAppear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillAppear:animated];</span><br><span class="line">    </span><br><span class="line">    [self getPlayerNotifications];</span><br><span class="line">    </span><br><span class="line">    [self.player play];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//发送通知改变播放方式</span><br><span class="line">- (void)getPlayerNotifications &#123;</span><br><span class="line"></span><br><span class="line">    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayerStateChangeNotification:) name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (void)moviePlayerStateChangeNotification:(NSNotification *)notification &#123;</span><br><span class="line">    </span><br><span class="line">    MPMoviePlayerController *moviePlayer = notification.object;</span><br><span class="line">    MPMoviePlaybackState playbackState = moviePlayer.playbackState;</span><br><span class="line">    </span><br><span class="line">    switch (playbackState) &#123;</span><br><span class="line">        case MPMoviePlaybackStatePaused:</span><br><span class="line">        case MPMoviePlaybackStateStopped:</span><br><span class="line">        case MPMoviePlaybackStateInterrupted:&#123;</span><br><span class="line">            </span><br><span class="line">            if (self.isLoop) &#123;</span><br><span class="line">                moviePlayer.controlStyle = MPMovieControlStyleNone;</span><br><span class="line">                [self.player play];</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            break;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">        default:</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>在视图消失后视频暂停播放，移除通知即可</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)viewDidDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewDidDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [self.player pause];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<hr>
-<p>一个仿照Keep登录页的实现思路大概就是这样，非常的简单。</p>
 
           
         
