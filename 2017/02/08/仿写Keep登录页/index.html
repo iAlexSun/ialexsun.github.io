@@ -1,0 +1,709 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="##前言
+有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。
+
+大家可以看一下效果图如下:
+
+##准备工作iOS9之前，iOS播放视频文件一般使用 MPMoviePlayerViewController。其实实现方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="仿写Keep登录页视频播放">
+<meta property="og:url" content="http://yoursite.com/2017/02/08/仿写Keep登录页/index.html">
+<meta property="og:site_name" content="iAlexSun's Blog">
+<meta property="og:description" content="##前言
+有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。
+
+大家可以看一下效果图如下:
+
+##准备工作iOS9之前，iOS播放视频文件一般使用 MPMoviePlayerViewController。其实实现方">
+<meta property="og:image" content="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif">
+<meta property="og:image" content="http://ac-mcm5vzvc.clouddn.com/9588ec9f1b0bdc928140.png">
+<meta property="og:image" content="http://ac-mcm5vzvc.clouddn.com/6895be146d70d3a027fa.png">
+<meta property="og:updated_time" content="2017-02-08T12:39:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="仿写Keep登录页视频播放">
+<meta name="twitter:description" content="##前言
+有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。
+
+大家可以看一下效果图如下:
+
+##准备工作iOS9之前，iOS播放视频文件一般使用 MPMoviePlayerViewController。其实实现方">
+<meta name="twitter:image" content="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 6315560190624138000,
+      author: 'ialexsun'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/02/08/仿写Keep登录页/"/>
+
+  <title> 仿写Keep登录页视频播放 | iAlexSun's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">iAlexSun's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Keep Heart</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://ialexsun.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/resume" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                仿写Keep登录页视频播放
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-02-08T20:18:27+08:00" content="2017-02-08">
+              2017-02-08
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/02/08/仿写Keep登录页/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/08/仿写Keep登录页/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>##前言</p>
+<p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
+<hr>
+<p>大家可以看一下效果图如下:</p>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif" alt=""></p>
+<p>##准备工作<br>iOS9之前，iOS播放视频文件一般使用 MPMoviePlayerViewController。其实实现方式非常容易就是想使用上述方式。</p>
+<ul>
+<li>要包含#import头文件和MediaPlayer.framework。</li>
+<li>应该准备一个视频文件,文件尽量小一些,最好为mp4格式(文件太太占用App的太多影响用户体验)。</li>
+<li>一个存储视频的Plist文件方便后面加载.<br><img src="http://ac-mcm5vzvc.clouddn.com/9588ec9f1b0bdc928140.png" alt=""></li>
+</ul>
+<p>##实现过程<br>首先我们应该讲视频文件中对应的信息都取出来放在对应的Model中,如果后面我们需要更改视频或者不循环播放等方式都可以直接修改Plist文件不修改任何代码,是不是很爽的样子。</p>
+<ul>
+<li>我们创建一个Model来存储对应信息.我们将信息取出来后,实现他们对应的类方法。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+(NSDictionary *)getUrlInfo;</span><br><span class="line">+(NSString *)getVideoUrl;</span><br><span class="line">+(NSString *)getVideoType;</span><br><span class="line">+(BOOL)getLoopMode;</span><br></pre></td></tr></table></figure>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/6895be146d70d3a027fa.png" alt=""></p>
+<p>到了最关键的一步就是加载这些文件,在最开始判断是否能够加载到这个视频的信息。</p>
+<ul>
+<li>如果有这个视频信息，就准备加载.</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> -(void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    if ([STLVideoFunctions getUrlInfo] != nil) &#123;</span><br><span class="line">        self.isLoop = [STLVideoFunctions getLoopMode];</span><br><span class="line">        </span><br><span class="line">        [self preparePlayback];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>加载视频和设置一些播放视频的属性添加到UIView上:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- (void)preparePlayback &#123;</span><br><span class="line">    if (self.player == nil) &#123;</span><br><span class="line">        NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:[STLVideoFunctions getVideoUrl] ofType:[STLVideoFunctions getVideoType]]];</span><br><span class="line">        </span><br><span class="line">        self.player = [[MPMoviePlayerController alloc] initWithContentURL:url];</span><br><span class="line">        [self.player setControlStyle:MPMovieControlStyleNone];</span><br><span class="line">        [self.player prepareToPlay];</span><br><span class="line">        [self.player.view setFrame:self.view.frame];</span><br><span class="line">        [self.view addSubview:self.player.view];</span><br><span class="line">        [self.view sendSubviewToBack:self.player.view];</span><br><span class="line">        self.player.scalingMode = MPMovieScalingModeAspectFill;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在出现之前发送通知就是控制视频播放和一些控制播放方式</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillAppear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillAppear:animated];</span><br><span class="line">    </span><br><span class="line">    [self getPlayerNotifications];</span><br><span class="line">    </span><br><span class="line">    [self.player play];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//发送通知改变播放方式</span><br><span class="line">- (void)getPlayerNotifications &#123;</span><br><span class="line"></span><br><span class="line">    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayerStateChangeNotification:) name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (void)moviePlayerStateChangeNotification:(NSNotification *)notification &#123;</span><br><span class="line">    </span><br><span class="line">    MPMoviePlayerController *moviePlayer = notification.object;</span><br><span class="line">    MPMoviePlaybackState playbackState = moviePlayer.playbackState;</span><br><span class="line">    </span><br><span class="line">    switch (playbackState) &#123;</span><br><span class="line">        case MPMoviePlaybackStatePaused:</span><br><span class="line">        case MPMoviePlaybackStateStopped:</span><br><span class="line">        case MPMoviePlaybackStateInterrupted:&#123;</span><br><span class="line">            </span><br><span class="line">            if (self.isLoop) &#123;</span><br><span class="line">                moviePlayer.controlStyle = MPMovieControlStyleNone;</span><br><span class="line">                [self.player play];</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            break;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">        default:</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在视图消失后视频暂停播放，移除通知即可</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)viewDidDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewDidDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [self.player pause];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<p>一个仿照Keep登录页的实现思路大概就是这样，非常的简单。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/17/函数式响应式编程入门--ReactiveCocoa和MVVM/" rel="next" title="函数式响应式编程入门 -- ReactiveCocoa和MVVM">
+                <i class="fa fa-chevron-left"></i> 函数式响应式编程入门 -- ReactiveCocoa和MVVM
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/02/08/仿写Keep登录页/"
+           data-title="仿写Keep登录页视频播放" data-url="http://yoursite.com/2017/02/08/仿写Keep登录页/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ac-mcm5vzvc.clouddn.com/dc39645a737220b1.png"
+               alt="iAlexSun" />
+          <p class="site-author-name" itemprop="name">iAlexSun</p>
+          <p class="site-description motion-element" itemprop="description">Welecome To iAlexSun's Blog。我是孙文（@iAlexSun）, 现在是一名大三的学生，同时极度热爱iOS开发。追求自由、随性的生活方式。</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">9</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/iAlexSun" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://bestswifter.com/" title="bestswifter" target="_blank">bestswifter</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://draveness.me/" title="draveness" target="_blank">draveness</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://desgard.com/" title="desgard" target="_blank">desgard</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://blog.sunnyxx.com/" title="sunnyxx" target="_blank">sunnyxx</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://blog.ibireme.com/" title="ibireme" target="_blank">ibireme</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">此文章未包含目录</p>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iAlexSun</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"ialexsun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
