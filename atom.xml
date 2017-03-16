@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>iAlexSun&#39;s</title>
+  <subtitle>Keep Heart</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2017-02-18T10:17:28.000Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>iAlexSun</name>
+    <email>s649605510@gmail.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>JS与原生交互几种方式</title>
+    <link href="http://yoursite.com/2017/02/04/JS%E4%B8%8E%E5%8E%9F%E7%94%9F%E4%BA%A4%E4%BA%92%E9%9B%86%E4%B8%AD%E6%96%B9%E5%BC%8F/"/>
+    <id>http://yoursite.com/2017/02/04/JS与原生交互集中方式/</id>
+    <published>2017-02-04T13:15:27.000Z</published>
+    <updated>2017-02-18T10:17:28.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="JS与原生交互几种方式"><a href="#JS与原生交互几种方式" class="headerlink" title="JS与原生交互几种方式"></a>JS与原生交互几种方式</h2><hr>
+<p>最近学习JS与原生交互发现一片新大陆,确切的说是WebView与JS交互在开发。发现有以下几种方法OC端与JS的交互大致有这几种：拦截协议、JavaScriptCore库、WKWebView、自定义NSURLProtocol拦截、WebViewJavascriptBridge。今天主要讲讲JavaScriptCore库的与OC端的交互。</p>
+<h2 id="1-JavaScriptCore"><a href="#1-JavaScriptCore" class="headerlink" title="1.JavaScriptCore"></a>1.JavaScriptCore</h2><p>JavaScriptCore一个iOS7引进的标准库，iOS7以前也有开发者自行导入使用。Web端也比较容易统一，JavaScriptCore可以理解为一个浏览器的运行内核，使用JavaScriptCore可以使用native代码（这里主要指objectiveC和swift）与js代码进行相互的调用，本文主要从几个方面进行了解。</p>
+<ul>
+<li>native调用js代码</li>
+<li>js调用native代码</li>
+<li>异常处理</li>
+<li>JavaScriptCore和webView的结合使用</li>
+</ul>
+<p>要使用JavaScriptCore，首先我们需要引入它的头文件 <code>#import &lt;JavaScriptCore/JavaScriptCore.h&gt;</code></p>
+<p>这个头里面引入了几个重要的对象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#import &quot;JSContext.h&quot;</span><br><span class="line">#import &quot;JSValue.h&quot;</span><br><span class="line">#import &quot;JSManagedValue.h&quot;</span><br><span class="line">#import &quot;JSVirtualMachine.h&quot;</span><br><span class="line">#import &quot;JSExport.h&quot;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>JSContext是JavaScript的运行上下文，他主要作用是执行js代码和注册native方法接口</li>
+<li>JSValue是JSContext执行后的返回结果，他可以是任何js类型（比如基本数据类型和函数类型，对象类型等），并且都有对象的方法转换为native对象。</li>
+<li>JSManagedValue是JSValue的封装，用它可以解决js和原声代码之间循环引用的问题</li>
+<li>JSVirtualMachine 管理JS运行时和管理js暴露的native对象的内存</li>
+<li>JSExport是一个协议，通过实现它可以完成把一个native对象暴漏给js</li>
+</ul>
+<h2 id="native调用js代码"><a href="#native调用js代码" class="headerlink" title="native调用js代码"></a>native调用js代码</h2><p>在JavaScriptCore中提供的调用JS的方法<code>- (JSValue *)evaluateScript:(NSString *)script;</code>方法就可以执行一段JavaScript脚本，并且如果其中有方法、变量等信息都会被存储在其中以便在需要的时候使用。JSValue提供了<code>- (JSValue *)callWithArguments:(NSArray *)arguments;</code>方法可以反过来将参数传进去来调用方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> // 一个JSContext对象，就类似于Js中的window，</span><br><span class="line"> // 只需要创建一次即可。</span><br><span class="line">JSContext *context = [[JSContext alloc] init];</span><br><span class="line">// 执行一段js</span><br><span class="line">[context evaluateScript:@&quot;function add(a, b) &#123; return a + b; &#125;&quot;];</span><br><span class="line">// 根据下标取出方法</span><br><span class="line">JSValue *add = context[@&quot;add&quot;];</span><br><span class="line">NSLog(@&quot;Func: %@&quot;, add);</span><br><span class="line">// 传入参数 调用取到的方法</span><br><span class="line">JSValue *sum = [add callWithArguments:@[@(7), @(21)]];</span><br><span class="line">NSLog(@&quot;Sum: %d&quot;,[sum toInt32]);</span><br><span class="line">//OutPut:</span><br><span class="line">// Func: function add(a, b) &#123; return a + b; &#125;</span><br><span class="line">// Sum: 28</span><br></pre></td></tr></table></figure>
+<p>另一个例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">self.jsContext = [[JSContext alloc] init];</span><br><span class="line"></span><br><span class="line">[self.jsContext evaluateScript:@&quot;var num = 10&quot;];</span><br><span class="line">[self.jsContext evaluateScript:@&quot;var squareFunc = function(value) &#123; return value * 2 &#125;&quot;];</span><br><span class="line">// 调用 计算面积</span><br><span class="line">JSValue *square = [self.jsContext evaluateScript:@&quot;squareFunc(num)&quot;];</span><br><span class="line"></span><br><span class="line">// 可以通过下标的方式获取到方法</span><br><span class="line">JSValue *squareFunc = self.jsContext[@&quot;squareFunc&quot;];</span><br><span class="line">// 传入参数 调用取到的方法</span><br><span class="line">JSValue *value = [squareFunc callWithArguments:@[@&quot;20&quot;]];</span><br><span class="line">NSLog(@&quot;%@&quot;, square.toNumber);</span><br><span class="line">NSLog(@&quot;%@&quot;, value.toNumber);</span><br></pre></td></tr></table></figure>
+<h3 id="JS调用OC"><a href="#JS调用OC" class="headerlink" title="JS调用OC"></a>JS调用OC</h3><p>使用JavaScriptCore进行原生与js的交互主要是2种方式，block和注入模型使用协议代理。</p>
+<ul>
+<li>Block方式</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">JSContext *context = [[JSContext alloc] init];</span><br><span class="line">// 定义一个block</span><br><span class="line">context[@&quot;log&quot;] = ^() &#123;</span><br><span class="line">  NSLog(@&quot;+++++++Begin Log+++++++&quot;);  </span><br><span class="line"></span><br><span class="line">  NSArray *args = [JSContext currentArguments];</span><br><span class="line">  for (JSValue *jsVal in args) &#123;</span><br><span class="line">   NSLog(@&quot;%@&quot;, jsVal);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  JSValue *this = [JSContext currentThis];</span><br><span class="line">  NSLog(@&quot;this: %@&quot;,this);</span><br><span class="line">  NSLog(@&quot;-------End Log-------&quot;);</span><br><span class="line">&#125;;</span><br><span class="line">// 调用js执行log方法</span><br><span class="line"> [context evaluateScript:@&quot;log(&apos;ider&apos;, [7, 21],     </span><br><span class="line"> &#123; hello:&apos;world&apos;, js:100 &#125;);&quot;];</span><br></pre></td></tr></table></figure>
+<p>当web端调用log方法，传入相关参数，就能调用OC端的block。实现交互。</p>
+<p>通过注入模型的方式交互</p>
+<p>首先，我们自定义一个协议，而且这个协议必须要遵守JSExport协议<br>协议暴露的方法，是供JS调用的方法。还可以实现回调。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">@protocol JavaScriptObjectiveCDelegate &lt;JSExport&gt;</span><br><span class="line"></span><br><span class="line">// JS调用此方法来调用OC的相机</span><br><span class="line">- (void)callSystemCamera;</span><br><span class="line"></span><br><span class="line">// 在JS中调用时，函数名应该为showAlertMsg(arg1, arg2)</span><br><span class="line">// 这里是只两个参数的。</span><br><span class="line">- (void)showAlert:(NSString *)title msg:(NSString *)msg;</span><br><span class="line"></span><br><span class="line">// 通过JSON传过来</span><br><span class="line">- (void)callWithDict:(NSDictionary *)params;</span><br><span class="line">// JS调用Oc，然后在OC中通过调用JS方法来传值给JS。</span><br><span class="line">- (void)jsCallObjcAndObjcCallJsWithDict:(NSDictionary *)params;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>接下来，我们还需要定义一个模型：</p>
+<p>// 此模型用于注入JS的模型，这样就可以通过模型来调用方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@interface HYBJsObjCModel : NSObject &lt;JavaScriptObjectiveCDelegate&gt;</span><br><span class="line"></span><br><span class="line">@property (nonatomic, weak) JSContext *jsContext;</span><br><span class="line">@property (nonatomic, weak) UIWebView *webView;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<ul>
+<li>模型的实现：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">@implementation HYBJsObjCModel</span><br><span class="line"></span><br><span class="line">- (void)callWithDict:(NSDictionary *)params &#123;</span><br><span class="line"> NSLog(@&quot;Js调用了OC的方法，参数为：%@&quot;, params);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// JS调用了callSystemCamera</span><br><span class="line">- (void)callSystemCamera &#123;</span><br><span class="line"> NSLog(@&quot;JS调用了OC的方法，调起系统相册&quot;);</span><br><span class="line"></span><br><span class="line"> // JS调用后OC后，可以传一个回调方法的参数，进行回调JS</span><br><span class="line"> JSValue *jsFunc = self.jsContext[@&quot;jsFunc&quot;];</span><br><span class="line"> [jsFunc callWithArguments:nil];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)jsCallObjcAndObjcCallJsWithDict:(NSDictionary *)params &#123;</span><br><span class="line"> NSLog(@&quot;jsCallObjcAndObjcCallJsWithDict was called, params is %@&quot;, params);</span><br><span class="line"></span><br><span class="line"> // 调用JS的方法</span><br><span class="line"> JSValue *jsParamFunc = self.jsContext[@&quot;jsParamFunc&quot;];</span><br><span class="line"> [jsParamFunc callWithArguments:@[@&#123;@&quot;age&quot;: @10, @&quot;name&quot;: @&quot;lili&quot;, @&quot;height&quot;: @158&#125;]];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 指定参数的用法</span><br><span class="line">// 在JS中调用时，函数名应该为showAlertMsg(arg1, arg2)</span><br><span class="line">- (void)showAlert:(NSString *)title msg:(NSString *)msg &#123;</span><br><span class="line"> dispatch_async(dispatch_get_main_queue(), ^&#123;</span><br><span class="line">   UIAlertView *a = [[UIAlertView alloc] initWithTitle:title message:msg delegate:nil cancelButtonTitle:@&quot;Ok&quot; otherButtonTitles:nil, nil];</span><br><span class="line">   [a show];</span><br><span class="line"> &#125;);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<h3 id="JavaScriptCore使用注意"><a href="#JavaScriptCore使用注意" class="headerlink" title="JavaScriptCore使用注意"></a>JavaScriptCore使用注意</h3><p>JavaScript调用本地方法是在子线程中执行的，这里要根据实际情况考虑线程之间的切换。</p>
+<p>模型实现完了，在哪里注入呢。在controller的webView加载完成后<br>我们是通过webView的valueForKeyPath获取的，其路径为documentView.webView.mainFrame.javaScriptContext。<br>这样就可以获取到JS的context，然后为这个context注入我们的模型对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark - UIWebViewDelegate</span><br><span class="line">- (void)webViewDidFinishLoad:(UIWebView *)webView </span><br><span class="line">&#123;</span><br><span class="line"> self.jsContext = [webView valueForKeyPath:@&quot;documentView.webView.mainFrame.javaScriptContext&quot;];</span><br><span class="line">  // 通过模型调用方法，这种方式更好些。</span><br><span class="line">  HYBJsObjCModel *model  = [[HYBJsObjCModel alloc] init];</span><br><span class="line">  // 模型</span><br><span class="line">  self.jsContext[@&quot;OCModel&quot;] = model;</span><br><span class="line">  model.jsContext = self.jsContext;</span><br><span class="line">  model.webView = self.webView;</span><br><span class="line">  // 增加异常的处理</span><br><span class="line">  self.jsContext.exceptionHandler = ^(JSContext *context,   </span><br><span class="line"> JSValue *exceptionValue) &#123;</span><br><span class="line">    context.exception = exceptionValue;</span><br><span class="line">    NSLog(@&quot;异常信息：%@&quot;, exceptionValue);</span><br><span class="line"> &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>另外关于模型，也可根据需求直接将模型作为controller，去实现相关的方法实现，省去模型这一层。 如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark - UIWebViewDelegate</span><br><span class="line"></span><br><span class="line">- (void)webViewDidFinishLoad:(UIWebView *)webView </span><br><span class="line">&#123;</span><br><span class="line">  self.jsContext = [webView valueForKeyPath:@&quot;documentView.webView.mainFrame.javaScriptContext&quot;]; </span><br><span class="line">  self.jsContext[@&quot;OCModel&quot;] = self; </span><br><span class="line">  self.jsContext.exceptionHandler = ^(JSContext *context, JSValue *exceptionValue) &#123;</span><br><span class="line">  context.exception = exceptionValue; </span><br><span class="line">  NSLog(@&quot;异常信息：%@&quot;, exceptionValue);</span><br><span class="line"> &#125;;</span><br><span class="line">&#125;</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head lang=&quot;en&quot;&gt;</span><br><span class="line">     &lt;meta charset=&quot;UTF-8&quot;&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">     &lt;div style=&quot;margin-top: 100px&quot;&gt; </span><br><span class="line">        &lt;h1&gt;Objective-C和JavaScript交互的那些事&lt;/h1&gt; </span><br><span class="line">        &lt;input type=&quot;button&quot; value=&quot;CallCamera&quot; onclick=&quot;OCModel.callCamera()&quot;&gt; </span><br><span class="line">      &lt;/div&gt;</span><br><span class="line"></span><br><span class="line">       &lt;div&gt;</span><br><span class="line">         &lt;input type=&quot;button&quot; value=&quot;Share&quot; onclick=&quot;callShare()&quot;&gt; </span><br><span class="line">       &lt;/div&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">       var callShare = function() &#123; </span><br><span class="line">          var shareInfo = JSON.stringify(&#123;&quot;title&quot;: &quot;标题&quot;, &quot;desc&quot;: &quot;内容&quot;, &quot;shareUrl&quot;: &quot;http://www.jianshu.com/p/f896d73c670a&quot;, </span><br><span class="line">          &quot;shareIco&quot;:&quot;http://upload-images.jianshu.io/upload_images/1192353-fd26211d54aea8a9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240&quot;&#125;); </span><br><span class="line">          OCModel.share(shareInfo);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       var picCallback = function(photos) &#123;</span><br><span class="line">       alert(photos);</span><br><span class="line">       &#125; </span><br><span class="line"></span><br><span class="line">       var shareCallback = function()&#123;</span><br><span class="line">       alert(&apos;success&apos;);</span><br><span class="line">       &#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<p>以上就是简单的利用JavaScriptCore framework进行JS交互的用法，</p>
+<h2 id="2-WebViewJavascriptBridge"><a href="#2-WebViewJavascriptBridge" class="headerlink" title="2. WebViewJavascriptBridge"></a>2. WebViewJavascriptBridge</h2><p>这个第三方库起先是在UIWebView与JS的深度交互大神文中知悉。其还是使用拦截WebView请求方法，但是做了完整的封装后，使用起来还是很简单的。</p>
+<p>1) 导入</p>
+<p><code>#import &quot;WKWebViewJavascriptBridge.h&quot;</code></p>
+<p>2) 初始化</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">self.bridge = [WebViewJavascriptBridge bridgeForWebView:webView];</span><br><span class="line">// 开启日志，方便调试</span><br><span class="line">[WebViewJavascriptBridge enableLogging];</span><br><span class="line">3) Web端setupWebViewJavascriptBridge</span><br><span class="line"></span><br><span class="line">function setupWebViewJavascriptBridge(callback) &#123;</span><br><span class="line">if (window.WebViewJavascriptBridge) &#123; return callback(WebViewJavascriptBridge); &#125;</span><br><span class="line">if (window.WVJBCallbacks) &#123; return window.WVJBCallbacks.push(callback); &#125;</span><br><span class="line">window.WVJBCallbacks = [callback];</span><br><span class="line">var WVJBIframe = document.createElement(&apos;iframe&apos;);</span><br><span class="line">WVJBIframe.style.display = &apos;none&apos;;</span><br><span class="line">WVJBIframe.src = &apos;wvjbscheme://__BRIDGE_LOADED__&apos;;</span><br><span class="line">document.documentElement.appendChild(WVJBIframe);</span><br><span class="line">setTimeout(function() &#123; document.documentElement.removeChild(WVJBIframe) &#125;, 0)</span><br><span class="line">&#125;</span><br><span class="line">4)call setupWebViewJavascriptBridge</span><br><span class="line"></span><br><span class="line">setupWebViewJavascriptBridge(function(bridge) &#123;</span><br><span class="line"></span><br><span class="line">/* Initialize your app here */</span><br><span class="line"></span><br><span class="line">bridge.registerHandler(&apos;JS Echo&apos;, function(data, responseCallback) &#123;</span><br><span class="line">    console.log(&quot;JS Echo called with:&quot;, data)</span><br><span class="line">    responseCallback(data)</span><br><span class="line">&#125;)</span><br><span class="line">bridge.callHandler(&apos;ObjC Echo&apos;, function responseCallback(responseData) &#123;</span><br><span class="line">    console.log(&quot;JS received response:&quot;, responseData)</span><br><span class="line">&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>OC端初始化时 默认消息处理器</p>
+<p>实例化WebViewJavascriptBridge并定义native端的默认消息处理器。</p>
+<p>JS调用bridge.send()即可触发默认处理。</p>
+<pre><code>_bridge = [WebViewJavascriptBridge bridgeForWebView:webView handler:^(id data, WVJBResponse *response) {  
+    NSLog(@&quot;ObjC received message from JS: %@&quot;, data);  
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@&quot;ObjC got message from Javascript:&quot; message:data delegate:nil cancelButtonTitle:@&quot;OK&quot; otherButtonTitles:nil];  
+    [alert show];  
+}];
+</code></pre><p>OC端调用[self.bridge send];即可触发JS端的默认处理。</p>
+<pre><code>[self.bridge send:@&quot;Give me a response, will you?&quot; responseCallback:^(id responseData) {
+NSLog(@&quot;ObjC got its response! %@&quot;, responseData);
+}];
+</code></pre><p>OC端registerHandler接收JS调用</p>
+<p>在JS中调用了bridge.callHandler(‘getScreenHeight’)就会触发OC注册的对应的handler，responseCallback中回调JS传递参数</p>
+<pre><code>[self.bridge registerHandler:@&quot;getScreenHeight&quot; handler:^(id data, WVJBResponseCallback responseCallback) {
+  NSLog(@&quot;ObjC Echo called with: %@&quot;, data);
+  responseCallback([NSNumber numberWithInt:[UIScreen              
+  mainScreen].bounds.size.height]);
+}];
+</code></pre><p>或者 JS传递data给OC，OC打印</p>
+<pre><code>[self.bridge registerHandler:@&quot;log&quot; handler:^(id data, WVJBResponseCallback responseCallback) {
+NSLog(@&quot;Log: %@&quot;, data);
+}];
+</code></pre><p>OC端callHandler调用JS</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">调用JS showAlert，传递data</span><br><span class="line"></span><br><span class="line">[self.bridge callHandler:@&quot;showAlert&quot; data:@&quot;Hi from ObjC to JS!&quot;];</span><br><span class="line">调用JS getCurrentPageUrl，在block中获取参数</span><br><span class="line"></span><br><span class="line">[self.bridge callHandler:@&quot;getCurrentPageUrl&quot; data:nil responseCallback:^(id responseData) &#123;</span><br><span class="line">    NSLog(@&quot;Current UIWebView page URL is: %@&quot;, responseData);</span><br><span class="line">&#125;];</span><br><span class="line">还可设置代理监听</span><br><span class="line"></span><br><span class="line">[bridge setWebViewDelegate:(UIWebViewDelegate*)webViewDelegate];</span><br><span class="line">JS registerHandler接收OC调用</span><br><span class="line"></span><br><span class="line">注册handle，OC可以通过[bridge callHandler:&quot;handlerName&quot; data:@&quot;Foo&quot;] 和 [bridge callHandler:&quot;handlerName&quot; data:@&quot;Foo&quot; responseCallback:^(id responseData) &#123; ... &#125;]进行调用JS</span><br><span class="line"></span><br><span class="line">OC传递data进行调用</span><br><span class="line"></span><br><span class="line">bridge.registerHandler(&quot;showAlert&quot;, function(data) &#123; alert(data) &#125;)</span><br><span class="line">参数结果回传给OC</span><br><span class="line"></span><br><span class="line">bridge.registerHandler(&quot;getCurrentPageUrl&quot;, function(data, responseCallback) &#123;</span><br><span class="line">responseCallback(document.location.toString())</span><br><span class="line">&#125;)</span><br><span class="line">bridge.callHandler(&quot;handlerName&quot;, data)</span><br><span class="line">JS 调用OC</span><br><span class="line"></span><br><span class="line">JS调用bridge.callHandler(&quot;handlerName&quot;, data)和bridge.callHandler(&quot;handlerName&quot;, data, function responseCallback(responseData) &#123; ... &#125;)</span><br></pre></td></tr></table></figure>
+<p>调用OC端打印</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bridge.callHandler(&quot;Log&quot;, &quot;Foo&quot;)</span><br><span class="line">调用OC端获取高度，在block中使用</span><br><span class="line"></span><br><span class="line">bridge.callHandler(&quot;getScreenHeight&quot;, null, function(response) &#123;</span><br><span class="line">alert(&apos;Screen height:&apos; + response)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="3-WKWebView-iOS8-or-Later"><a href="#3-WKWebView-iOS8-or-Later" class="headerlink" title="3.WKWebView - iOS8 or Later"></a>3.WKWebView - iOS8 or Later</h2><p>iOS8，苹果新推出了WebKit，用WKWebView代替UIWebView和WebView。相关的使用和特性可以细读。<br>WKWeb​View<br>iOS 8 WebKit框架概览（下）<br>WKWebView特性及使用</p>
+<h3 id="WKWebView新特性"><a href="#WKWebView新特性" class="headerlink" title="WKWebView新特性"></a>WKWebView新特性</h3><p>性能、稳定性、功能大幅度提升<br>允许JavaScript的Nitro库加载并使用（UIWebView中限制）<br>支持了更多的HTML5特性<br>高达60fps的滚动刷新率以及内置手势<br>GPU硬件加速<br>KVO<br>重构UIWebView成14类与3个协议，查看官方文档</p>
+<p>需要注意的是WKWebView貌似不支持NSURLProtocol和NSURLCache。不能做缓存的话，就蛋疼了。</p>
+<p>关于WKWebView的代理方法 这篇有比较完整的介绍<br><a href="http://www.jianshu.com/p/1d7a8525ad16" target="_blank" rel="external">http://www.jianshu.com/p/1d7a8525ad16</a></p>
+<p>下面是相关的交互方法</p>
+<p>WKWebView调用js方法和UIWebView类似，一个是evaluateJavaScript，一个是stringByEvaluatingJavaScriptFromString。获取返回值的方式不同，WKWebView用的是回叫函数获取返回值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"> //直接调用js</span><br><span class="line">    webView.evaluateJavaScript(&quot;hi()&quot;, completionHandler: nil)</span><br><span class="line">//调用js带参数</span><br><span class="line">    webView.evaluateJavaScript(&quot;hello(&apos;liuyanwei&apos;)&quot;, completionHandler: nil)</span><br><span class="line">// 调用js获取返回值</span><br><span class="line">   webView.evaluateJavaScript(&quot;getName()&quot;) &#123; (any,error) -&gt; Void in</span><br><span class="line">        NSLog(&quot;%@&quot;, any as! String)</span><br><span class="line">    &#125;</span><br><span class="line">UIwebView没有js调app的方法，而在WKWebView中有了改进。具体步骤分为app注册handler，app处理handler委托，js调用三个步骤</span><br><span class="line"></span><br><span class="line">注册handler需要在webView初始化之前，如示例，注册了一个webViewApp的handler</span><br><span class="line">     config = WKWebViewConfiguration()</span><br><span class="line">      //注册js方法</span><br><span class="line">     config.userContentController.addScriptMessageHandler(self, name: &quot;webViewApp&quot;)</span><br><span class="line">      // 初始化</span><br><span class="line">     webView = WKWebView(frame: self.webWrap.frame, configuration: config)</span><br><span class="line">处理handler委托。ViewController实现WKScriptMessageHandler委托的func userContentController(userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage)代理方法。在里面处理事件。</span><br><span class="line">     //实现WKScriptMessageHandler委托</span><br><span class="line">     class ViewController：WKScriptMessageHandler</span><br><span class="line">     //实现js调用ios的handle委托</span><br><span class="line">     func userContentController(userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) &#123;</span><br><span class="line">     //接受传过来的消息从而决定app调用的方法</span><br><span class="line">      let dict = message.body as! Dictionary&lt;String,String&gt;</span><br><span class="line">      let method:String = dict[&quot;method&quot;]!</span><br><span class="line">      let param1:String = dict[&quot;param1&quot;]!</span><br><span class="line">      if method==&quot;hello&quot;&#123;</span><br><span class="line">          hello(param1)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>js调用 。通过window.webkit.messageHandlers.webViewApp找到之前注册的handler对象，然后调用postMessage方法把数据传到app，app通过上一步的方法解析方法名和参数。webViewApp是之前注册的name</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">var message = &#123;</span><br><span class="line">                &apos;method&apos; : &apos;hello&apos;,</span><br><span class="line">                &apos;param1&apos; : &apos;liuyanwei&apos;,</span><br><span class="line">                &#125;;</span><br><span class="line">window.webkit.messageHandlers.webViewApp.postMessage(message);</span><br></pre></td></tr></table></figure>
+<p>如果需要app对js的调用有所响应，可以通过回叫函数的方式回应js。可以在调用app的时候增加一个js回叫函数名 ,app在处理完之后可以呼叫回叫函数并把需要的参数通过回叫函数的方式进行传递</p>
+<p>WKUserScript 允许在正文加载之前或之后注入到页面中。这个强大的功能允许在页面中以安全且唯一的方式操作网页内容。</p>
+<p>一个简单的例子如下，用户改变背景的用户脚本被插入到网页中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">let source = &quot;document.body.style.background = \&quot;#777\&quot;;&quot;</span><br><span class="line">let userScript = WKUserScript(source: source,     injectionTime: .AtDocumentEnd, forMainFrameOnly: true)</span><br><span class="line"></span><br><span class="line">let userContentController = WKUserContentController()</span><br><span class="line">userContentController.addUserScript(userScript)</span><br><span class="line"></span><br><span class="line">let configuration = WKWebViewConfiguration()</span><br><span class="line">configuration.userContentController = userContentController</span><br><span class="line">self.webView = WKWebView(frame: self.view.bounds, configuration: configuration)</span><br></pre></td></tr></table></figure>
+<p>WKUserScript 对象可以以 JavaScript 源码形式初始化，初始化时还可以传入是在加载之前还是结束时注入，以及脚本影响的是这个布局还是仅主要布局。于是用户脚本被加入到 WKUserContentController 中，并且以 WKWebViewConfiguration 属性传入到 WKWebView 的初始化过程中。</p>
+<h2 id="4-拦截协议"><a href="#4-拦截协议" class="headerlink" title="4. 拦截协议"></a>4. 拦截协议</h2><p>最简单也是最容易想到的一种<br>UIWebView的代理方法，web view发出请求后拦截，查看是否为约定的协议，采取处理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">-(BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType</span><br><span class="line">&#123;</span><br><span class="line">    NSString *url = request.URL.absoluteString;</span><br><span class="line">    if ([url rangeOfString:@&quot;camera://&quot;].location != NSNotFound) &#123;</span><br><span class="line">        // url的协议头是camera</span><br><span class="line">        NSLog(@&quot;callCamera&quot;);</span><br><span class="line">        return NO;</span><br><span class="line">    &#125;</span><br><span class="line">    return YES;</span><br><span class="line">&#125;</span><br><span class="line">WKWebView</span><br><span class="line"></span><br><span class="line">-(void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler</span><br><span class="line">&#123;</span><br><span class="line">    NSString *url = navigationAction.request.URL.absoluteString;</span><br><span class="line">    NSLog(@&quot;%@&quot;,url);</span><br><span class="line"></span><br><span class="line">    if (navigationAction.navigationType == WKNavigationTypeLinkActivated  &amp;&amp; [url rangeOfString:@&quot;camera://&quot;].location != NSNotFound)</span><br><span class="line">    &#123;</span><br><span class="line">        // url的协议头是camera</span><br><span class="line">        NSLog(@&quot;callCamera&quot;);</span><br><span class="line">        decisionHandler(WKNavigationActionPolicyCancel);</span><br><span class="line"></span><br><span class="line">        // dosomthing。。。</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        decisionHandler(WKNavigationActionPolicyAllow);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="5-NSURLProtocol拦截"><a href="#5-NSURLProtocol拦截" class="headerlink" title="5. NSURLProtocol拦截"></a>5. NSURLProtocol拦截</h2><p>这种方式也是最近才看到，原本利用自定义NSURLProtocol来做缓存处理。相关的文章可以看：<br>NSURLProtocol和NSRunLoop的那些坑<br>iOS中的 NSURLProtocol</p>
+<p>在自定义的Protocol的<code>- (void)startLoading</code>方法中，可以拦截到请求。一般会在这里做缓存的判断与读取处理。在此处，也可以判断约定的协议，然后发送通知，客户端就可以接收到通知，执行相应的方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">- (void)startLoading</span><br><span class="line">&#123;</span><br><span class="line">    NSString * url = [[[self request] URL] absoluteString];</span><br><span class="line"></span><br><span class="line">    if([url hasPrefix:@&quot;LocalActions/&quot;])</span><br><span class="line">    &#123;</span><br><span class="line">        NSString * actname = [url stringByReplacingOccurrencesOfString:@&quot;LocalActions/&quot; withString:@&quot;LocalAction_&quot;];</span><br><span class="line"></span><br><span class="line">        // 发送通知  客户端就可执行方法</span><br><span class="line">        [[NSNotificationCenter defaultCenter] postNotificationName:actname object:nil];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;JS与原生交互几种方式&quot;&gt;&lt;a href=&quot;#JS与原生交互几种方式&quot; class=&quot;headerlink&quot; title=&quot;JS与原生交互几种方式&quot;&gt;&lt;/a&gt;JS与原生交互几种方式&lt;/h2&gt;&lt;hr&gt;
+&lt;p&gt;最近学习JS与原生交互发现一片新大陆,确切的说是WebVi
+    
+    </summary>
+    
+      <category term="iOS JS 前端 WebView" scheme="http://yoursite.com/categories/iOS-JS-%E5%89%8D%E7%AB%AF-WebView/"/>
+    
+    
+      <category term="JS与原生交互几种方式" scheme="http://yoursite.com/tags/JS%E4%B8%8E%E5%8E%9F%E7%94%9F%E4%BA%A4%E4%BA%92%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>仿写Keep登录页视频播放</title>
+    <link href="http://yoursite.com/2017/01/18/%E4%BB%BF%E5%86%99Keep%E7%99%BB%E5%BD%95%E9%A1%B5/"/>
+    <id>http://yoursite.com/2017/01/18/仿写Keep登录页/</id>
+    <published>2017-01-18T12:18:27.000Z</published>
+    <updated>2017-03-13T02:45:26.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
+<hr>
+<p>大家可以看一下效果图如下:</p>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif" alt=""></p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>iOS9之前，iOS播放视频文件一般使用 MPMoviePlayerViewController。其实实现方式非常容易就是想使用上述方式。</p>
+<ul>
+<li>要包含#import头文件和MediaPlayer.framework。</li>
+<li>应该准备一个视频文件,文件尽量小一些,最好为mp4格式(文件太太占用App的太多影响用户体验)。</li>
+<li>一个存储视频的Plist文件方便后面加载.<br><img src="http://ac-mcm5vzvc.clouddn.com/9588ec9f1b0bdc928140.png" alt=""></li>
+</ul>
+<h2 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h2><p>首先我们应该讲视频文件中对应的信息都取出来放在对应的Model中,如果后面我们需要更改视频或者不循环播放等方式都可以直接修改Plist文件不修改任何代码,是不是很爽的样子。</p>
+<ul>
+<li>我们创建一个Model来存储对应信息.我们将信息取出来后,实现他们对应的类方法。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+(NSDictionary *)getUrlInfo;</span><br><span class="line">+(NSString *)getVideoUrl;</span><br><span class="line">+(NSString *)getVideoType;</span><br><span class="line">+(BOOL)getLoopMode;</span><br></pre></td></tr></table></figure>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/6895be146d70d3a027fa.png" alt=""></p>
+<p>到了最关键的一步就是加载这些文件,在最开始判断是否能够加载到这个视频的信息。</p>
+<ul>
+<li>如果有这个视频信息，就准备加载.</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> -(void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    if ([STLVideoFunctions getUrlInfo] != nil) &#123;</span><br><span class="line">        self.isLoop = [STLVideoFunctions getLoopMode];</span><br><span class="line">        </span><br><span class="line">        [self preparePlayback];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>加载视频和设置一些播放视频的属性添加到UIView上:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- (void)preparePlayback &#123;</span><br><span class="line">    if (self.player == nil) &#123;</span><br><span class="line">        NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:[STLVideoFunctions getVideoUrl] ofType:[STLVideoFunctions getVideoType]]];</span><br><span class="line">        </span><br><span class="line">        self.player = [[MPMoviePlayerController alloc] initWithContentURL:url];</span><br><span class="line">        [self.player setControlStyle:MPMovieControlStyleNone];</span><br><span class="line">        [self.player prepareToPlay];</span><br><span class="line">        [self.player.view setFrame:self.view.frame];</span><br><span class="line">        [self.view addSubview:self.player.view];</span><br><span class="line">        [self.view sendSubviewToBack:self.player.view];</span><br><span class="line">        self.player.scalingMode = MPMovieScalingModeAspectFill;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在出现之前发送通知就是控制视频播放和一些控制播放方式</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillAppear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillAppear:animated];</span><br><span class="line">    </span><br><span class="line">    [self getPlayerNotifications];</span><br><span class="line">    </span><br><span class="line">    [self.player play];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//发送通知改变播放方式</span><br><span class="line">- (void)getPlayerNotifications &#123;</span><br><span class="line"></span><br><span class="line">    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayerStateChangeNotification:) name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (void)moviePlayerStateChangeNotification:(NSNotification *)notification &#123;</span><br><span class="line">    </span><br><span class="line">    MPMoviePlayerController *moviePlayer = notification.object;</span><br><span class="line">    MPMoviePlaybackState playbackState = moviePlayer.playbackState;</span><br><span class="line">    </span><br><span class="line">    switch (playbackState) &#123;</span><br><span class="line">        case MPMoviePlaybackStatePaused:</span><br><span class="line">        case MPMoviePlaybackStateStopped:</span><br><span class="line">        case MPMoviePlaybackStateInterrupted:&#123;</span><br><span class="line">            </span><br><span class="line">            if (self.isLoop) &#123;</span><br><span class="line">                moviePlayer.controlStyle = MPMovieControlStyleNone;</span><br><span class="line">                [self.player play];</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            break;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">        default:</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在视图消失后视频暂停播放，移除通知即可</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (void)viewWillDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewWillDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)viewDidDisappear:(BOOL)animated &#123;</span><br><span class="line"></span><br><span class="line">    [super viewDidDisappear:animated];</span><br><span class="line">    </span><br><span class="line">    [self.player pause];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<p>一个仿照Keep登录页的实现思路大概就是这样，非常的简单。</p>
+<h3 id="下载地址"><a href="#下载地址" class="headerlink" title="下载地址"></a>下载地址</h3><p><a href="https://github.com/iAlexSun/MySampleCode.git" target="_blank" rel="external">GitHub: https://github.com/iAlexSun/MySampleCode.git</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>你应该了解的运行时--Runtime</title>
+    <link href="http://yoursite.com/2016/08/14/Runtime/"/>
+    <id>http://yoursite.com/2016/08/14/Runtime/</id>
+    <published>2016-08-14T14:38:27.000Z</published>
+    <updated>2016-08-20T13:44:46.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Objective-C的由来"><a href="#Objective-C的由来" class="headerlink" title="Objective-C的由来"></a>Objective-C的由来</h3><hr>
+<p>其实这套语言并不是苹果原声的语言,是乔帮主离开苹果在NextStep组建的一个加强小分队带来的一门语言,非常的强悍，到今天为止大约有了将近30年多年的历史.但是Objective-C是一个门非常奇怪的语言,为什么这么说呢,以为大家都感觉OC的语法十分的”特别”.我慢慢也才习惯这样的语法。但是Objective-C也有它的优点那就是其他语言没有的<code>运行时</code>，也就是我们常常说的Runtime，这个东西不需要你去管理，但是如果你了解了关于OC底层的知识会对编程有一个更高层次的看法，废话不多说，直接看看Runtime是个什么玩意这么牛X;</p>
+<h3 id="Runtime的前世今生"><a href="#Runtime的前世今生" class="headerlink" title="Runtime的前世今生"></a>Runtime的前世今生</h3><hr>
+<p>以下会把Objective-C简称为OC,它是基于C语言，但是加入和面向对象的特性，而后扩展的核心就是一个用C和编译语言写的Runtime库。它是OC面相对象和动态运行的基石，，如果你想了解OC那就先了解Runtime，如果你想了解Runtime，那就要了解它的核心 - 消息传递机制;</p>
+<h3 id="消息传递（Messaging）"><a href="#消息传递（Messaging）" class="headerlink" title="消息传递（Messaging）"></a>消息传递（Messaging）</h3><hr>
+<p>很多语言中并不是使用了这个机制，因为调用一个方法就是调到内存中的某一点并且开始执行代码。但是这个机制并不会这样做，<code>[object foo]</code> 语法并不会立即执行 <code>foo</code> 这个方法的代码.你肯定会问那会怎么做，别着急啊。听我慢慢讲，它会在运行时把object发送一条叫foo的消息。OC函数调用的语法都会被翻译成一个C语言的函数<code>objc_msgSend()</code>，消息传递隐藏在<code>objc_object</code>中isa指针和`objc_class中class dispatch table。</p>
+<h3 id="objc-object-objc-class-以及-Ojbc-method"><a href="#objc-object-objc-class-以及-Ojbc-method" class="headerlink" title="objc _ object, objc_class 以及 Ojbc _method"></a>objc _ object, objc_class 以及 Ojbc _method</h3><hr>
+<p>在OC中类，对象和方法都是一个C的结构体,从objc/objc.h头文件中可以看到如下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">struct objc_object &#123;  </span><br><span class="line">    Class isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct objc_class &#123;  </span><br><span class="line">    Class isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">#if !__OBJC2__</span><br><span class="line">    Class super_class;</span><br><span class="line">    const char *name;</span><br><span class="line">    long version;</span><br><span class="line">    long info;</span><br><span class="line">    long instance_size;</span><br><span class="line">    struct objc_ivar_list *ivars;</span><br><span class="line">    **struct objc_method_list **methodLists**;</span><br><span class="line">    **struct objc_cache *cache**;</span><br><span class="line">    struct objc_protocol_list *protocols;</span><br><span class="line">#endif</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct objc_method_list &#123;  </span><br><span class="line">    struct objc_method_list *obsolete;</span><br><span class="line">    int method_count;</span><br><span class="line"></span><br><span class="line">#ifdef __LP64__</span><br><span class="line">    int space;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    /* variable length structure */</span><br><span class="line">    struct objc_method method_list[1];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct objc_method &#123;  </span><br><span class="line">    SEL method_name;</span><br><span class="line">    char *method_types; /* a string representing argument/return types */</span><br><span class="line">    IMP method_imp;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在这些定义中可以看出发送一条消息也就<code>objc_msgSend</code>做了什么是。例如<code>objc_msgSend(obj, foo)</code>这个例子:</p>
+<ul>
+<li>从obj的isa指针去找到它的class;</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;Objective-C的由来&quot;&gt;&lt;a href=&quot;#Objective-C的由来&quot; class=&quot;headerlink&quot; title=&quot;Objective-C的由来&quot;&gt;&lt;/a&gt;Objective-C的由来&lt;/h3&gt;&lt;hr&gt;
+&lt;p&gt;其实这套语言并不是苹果原声的语言,
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+    
+    
+      <category term="Runtime" scheme="http://yoursite.com/tags/Runtime/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>内存管理--AutoreleasePool（二）</title>
+    <link href="http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/"/>
+    <id>http://yoursite.com/2016/08/14/内存管理--AutoreleasePool/</id>
+    <published>2016-08-14T14:38:27.000Z</published>
+    <updated>2016-08-14T14:39:52.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><hr>
+<p>接着上回书说到关于<code>AutoreleasePool</code>的内部构造，那我们就来看看<code>AutoreleasePoolPage</code>中到底是如何运行的.</p>
+<h3 id="AutoreleasePoolPage-的结构"><a href="#AutoreleasePoolPage-的结构" class="headerlink" title="AutoreleasePoolPage 的结构"></a>AutoreleasePoolPage 的结构</h3><hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void *objc_autoreleasePoolPush(void) &#123;  </span><br><span class="line">    return AutoreleasePoolPage::push();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void objc_autoreleasePoolPop(void *ctxt) &#123;  </span><br><span class="line">    AutoreleasePoolPage::pop(ctxt);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的方法看上去是对 AutoreleasePoolPage 对应静态方法 push 和 pop 的封装。那我们就深入了解一下<code>AutoreleasePoolPage</code>,<code>objc_autoreleasePoolPush</code>,<code>objc_autoreleasePoolPop</code>。</p>
+<p>AutoreleasePoolPage的结构:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class AutoreleasePoolPage &#123;  </span><br><span class="line">    magic_t const magic;</span><br><span class="line">    id *next;</span><br><span class="line">    pthread_t const thread;</span><br><span class="line">    AutoreleasePoolPage * const parent;</span><br><span class="line">    AutoreleasePoolPage *child;</span><br><span class="line">    uint32_t const depth;</span><br><span class="line">    uint32_t hiwat;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>magic 为了保证AutoreleasePoolPage的完整性.</li>
+<li>thread 保存当前页线程</li>
+</ul>
+<p>每一个自动释放池都是由一系列<code>AutoreleasePoolPage</code>组成的,每个<br><code>AutoreleasePoolPage</code>大小是<code>4096</code>字节。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#define I386_PGBYTES 4096</span><br><span class="line">#define PAGE_SIZE I386_PGBYTES</span><br></pre></td></tr></table></figure>
+<p>可以看出上述中有<code>parent ``child</code>指针就可以知道自动释放池中的<code>AutoreleasePoolPage</code>是以双向链表连接起来的。</p>
+<h3 id="POOL-SENTINEL（哨兵对象）"><a href="#POOL-SENTINEL（哨兵对象）" class="headerlink" title="POOL_SENTINEL（哨兵对象）"></a>POOL_SENTINEL（哨兵对象）</h3><hr>
+<p>为什么会出现这个<code>哨兵对象</code>呢？它到底是什么,它为什么会出现在栈中?</p>
+<p>####POOL_SENTINEL是什么？</p>
+<p><code>#define POOL_SENTINEL nil</code><br><code>POOL_SENTINEL</code>只是nil的一个别名。那它的作用是什么,我们可以接着往下看。每次<code>objc_autoreleasePoolPush</code>的时候，都会把一个<code>POOL_SENTINEL</code>对象压到释放池的栈顶并且返回<code>POOL_SENTINEL</code>对象.</p>
+<p>相当于</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, const char * argv[]) &#123;  </span><br><span class="line">    &#123;</span><br><span class="line">        void * atautoreleasepoolobj = objc_autoreleasePoolPush();</span><br><span class="line"></span><br><span class="line">        // do whatever you want</span><br><span class="line"></span><br><span class="line">        objc_autoreleasePoolPop(atautoreleasepoolobj);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>atautoreleasepoolobj</code>就是一个<code>POOL_SENTINEL</code>。<br>而当方法 <code>objc_autoreleasePoolPop</code>调用时，就会向自动释放池中的对象发送 <code>release</code> 消息，直到第一个 <code>POOL_SENTINEL</code>。</p>
+</blockquote>
+<h3 id="objc-autoreleasePoolPush-方法"><a href="#objc-autoreleasePoolPush-方法" class="headerlink" title="objc_autoreleasePoolPush 方法"></a>objc_autoreleasePoolPush 方法</h3><hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">void *objc_autoreleasePoolPush(void) &#123;  </span><br><span class="line">    return AutoreleasePoolPage::push();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>它调用 AutoreleasePoolPage 的类方法 push，也非常简单：</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">static inline void *push() &#123;  </span><br><span class="line">   return autoreleaseFast(POOL_SENTINEL);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>出现了非常关键的方法<code>autoreleaseFast</code>方法,并传入哨兵对象<code>POOL_SENTINEL</code>让我们进入<code>autoreleaseFast</code>方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">static inline id *autoreleaseFast(id obj)  </span><br><span class="line">&#123;</span><br><span class="line">   AutoreleasePoolPage *page = hotPage();</span><br><span class="line">   if (page &amp;&amp; !page-&gt;full()) &#123;</span><br><span class="line">       return page-&gt;add(obj);</span><br><span class="line">   &#125; else if (page) &#123;</span><br><span class="line">       return autoreleaseFullPage(obj, page);</span><br><span class="line">   &#125; else &#123;</span><br><span class="line">       return autoreleaseNoPage(obj);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>hotPage是当前page不满的状态<ul>
+<li>调用 page-&gt;add(obj) 方法将对象添加至AutoreleasePoolPage 的栈中 </li>
+</ul>
+</li>
+<li>hotPage是当前page满的状态<ul>
+<li>autoreleaseFullPage会创建一个空白页(Page)</li>
+<li>调用 page-&gt;add(obj) 方法将对象添加至AutoreleasePoolPage 的栈中 </li>
+</ul>
+</li>
+<li>无hotPage的状态<ul>
+<li>调用 autoreleaseNoPage 创建一个 hotPage</li>
+<li>调用 page-&gt;add(obj) 方法将对象添加至 AutoreleasePoolPage 的栈中 </li>
+</ul>
+</li>
+</ul>
+<p>最后的都会调用 page-&gt;add(obj) 将对象添加到自动释放池中。</p>
+<blockquote>
+<p>hotPage 可以理解为当前正在使用的 AutoreleasePoolPage。</p>
+</blockquote>
+<h3 id="page-gt-add-添加对象"><a href="#page-gt-add-添加对象" class="headerlink" title="page-&gt;add 添加对象"></a>page-&gt;add 添加对象</h3><hr>
+<p><code>id *add(id obj)</code>将对象添加到自动释放池页中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">id *add(id obj) &#123;  </span><br><span class="line">    id *ret = next;</span><br><span class="line">    *next = obj;</span><br><span class="line">    next++;</span><br><span class="line">    return ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实就是一个压栈的过程,将对象加入 AutoreleasePoolPage 然后移动栈顶的指针。</p>
+<h3 id="autoreleaseFullPage（当前-hotPage-已满）"><a href="#autoreleaseFullPage（当前-hotPage-已满）" class="headerlink" title="autoreleaseFullPage（当前 hotPage 已满）"></a>autoreleaseFullPage（当前 hotPage 已满）</h3><hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">static id *autoreleaseFullPage(id obj, AutoreleasePoolPage *page) &#123;  </span><br><span class="line">    do &#123;</span><br><span class="line">        if (page-&gt;child) page = page-&gt;child;</span><br><span class="line">        else page = new AutoreleasePoolPage(page);</span><br><span class="line">    &#125; while (page-&gt;full());</span><br><span class="line"></span><br><span class="line">    setHotPage(page);</span><br><span class="line">    return page-&gt;add(obj);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上述代码中我们可以看到,它开始从传入的<code>page</code>开始遍历整个双向链表。</p>
+<ul>
+<li>找到一个未满的<code>AutoreleasePoolPage</code><ul>
+<li>传入一个parent创建一个新的<code>AutoreleasePoolPage</code></li>
+</ul>
+</li>
+</ul>
+<p>查找到一个可以使用的 AutoreleasePoolPage 之后，会将该页面标记成 hotPage，然后调动上面分析过的 page-&gt;add 方法添加对象。</p>
+<h3 id="autoreleaseNoPage（没有-hotPage）"><a href="#autoreleaseNoPage（没有-hotPage）" class="headerlink" title="autoreleaseNoPage（没有 hotPage）"></a>autoreleaseNoPage（没有 hotPage）</h3><hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">static id *autoreleaseNoPage(id obj) &#123;  </span><br><span class="line">    AutoreleasePoolPage *page = new AutoreleasePoolPage(nil);</span><br><span class="line">    setHotPage(page);</span><br><span class="line"></span><br><span class="line">    if (obj != POOL_SENTINEL) &#123;</span><br><span class="line">        page-&gt;add(POOL_SENTINEL);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return page-&gt;add(obj);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>既然当前内存中不存在<code>AutoreleasePoolPage</code>，就要从头开始构建这个自动释放池的双向链表，也就是说，新的 <code>AutoreleasePoolPage</code> 是没有 parent 指针的。</p>
+<p>初始化之后，将当前页标记为 hotPage，然后会先向这个 page 中添加一个<code>POOL_SENTINEL</code> 对象，来确保在 pop 调用的时候，不会出现异常。</p>
+<p>最后，将 obj 添加到自动释放池中。</p>
+<h3 id="objc-autoreleasePoolPop-方法"><a href="#objc-autoreleasePoolPop-方法" class="headerlink" title="objc_autoreleasePoolPop 方法"></a>objc_autoreleasePoolPop 方法</h3><hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">void objc_autoreleasePoolPop(void *ctxt) &#123;  </span><br><span class="line">    AutoreleasePoolPage::pop(ctxt);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这个方法中一般情况下我们会传入一个<code>POOL_SENTINEL</code> 对象。</p>
+<p><code>AutoreleasePoolPage::pop 方法的调用：</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">static inline void pop(void *token) &#123;  </span><br><span class="line">    AutoreleasePoolPage *page = pageForPointer(token);</span><br><span class="line">    id *stop = (id *)token;</span><br><span class="line"></span><br><span class="line">    page-&gt;releaseUntil(stop);</span><br><span class="line"></span><br><span class="line">    if (page-&gt;child) &#123;</span><br><span class="line">        if (page-&gt;lessThanHalfFull()) &#123;</span><br><span class="line">            page-&gt;child-&gt;kill();</span><br><span class="line">        &#125; else if (page-&gt;child-&gt;child) &#123;</span><br><span class="line">            page-&gt;child-&gt;child-&gt;kill();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>pop调用的步骤:</p>
+<ul>
+<li>使用 pageForPointer 获取当前 token 所在的 AutoreleasePoolPage</li>
+<li>调用 releaseUntil 方法释放栈中的对象，直到 stop</li>
+<li>调用 child 的 kill 方法</li>
+</ul>
+<p><code>pageForPointer</code> 获取<code>AutoreleasePoolPage</code><br><code>pageForPointer</code> 方法主要是通过内存地址的操作，获取当前指针所在页的首地址</p>
+<h3 id="releaseUntil-释放对象"><a href="#releaseUntil-释放对象" class="headerlink" title="releaseUntil 释放对象"></a>releaseUntil 释放对象</h3><hr>
+<p><code>releaseUntil</code> 方法的实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">void releaseUntil(id *stop) &#123;  </span><br><span class="line">    while (this-&gt;next != stop) &#123;</span><br><span class="line">        AutoreleasePoolPage *page = hotPage();</span><br><span class="line"></span><br><span class="line">        while (page-&gt;empty()) &#123;</span><br><span class="line">            page = page-&gt;parent;</span><br><span class="line">            setHotPage(page);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        page-&gt;unprotect();</span><br><span class="line">        id obj = *--page-&gt;next;</span><br><span class="line">        memset((void*)page-&gt;next, SCRIBBLE, sizeof(*page-&gt;next));</span><br><span class="line">        page-&gt;protect();</span><br><span class="line"></span><br><span class="line">        if (obj != POOL_SENTINEL) &#123;</span><br><span class="line">            objc_release(obj);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    setHotPage(this);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>它的实现还是很容易的，用一个 while 循环持续释放 AutoreleasePoolPage 中的内容，直到 next 指向了 stop 。</p>
+<p>使用 memset 将内存的内容设置成 SCRIBBLE，然后使用 objc_release 释放对象。</p>
+<h3 id="kill-方法"><a href="#kill-方法" class="headerlink" title="kill() 方法"></a>kill() 方法</h3><hr>
+<p>到这里，没有分析的方法就只剩下 kill 了，而它会将当前页面以及子页面全部删除</p>
+<h3 id="autorelease方法"><a href="#autorelease方法" class="headerlink" title="autorelease方法"></a>autorelease方法</h3><p>我们已经对自动释放池生命周期有一个比较好的了解，最后需要了解的话题就是 autorelease 方法的实现，先来看一下方法的调用栈：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">- [NSObject autorelease]</span><br><span class="line">└── id objc_object::rootAutorelease()</span><br><span class="line">    └── id objc_object::rootAutorelease2()</span><br><span class="line">        └── static id AutoreleasePoolPage::autorelease(id obj)</span><br><span class="line">            └── static id AutoreleasePoolPage::autoreleaseFast(id obj)</span><br><span class="line">                ├── id *add(id obj)</span><br><span class="line">                ├── static id *autoreleaseFullPage(id obj, AutoreleasePoolPage *page)</span><br><span class="line">                │   ├── AutoreleasePoolPage(AutoreleasePoolPage *newParent)</span><br><span class="line">                │   └── id *add(id obj)</span><br><span class="line">                └── static id *autoreleaseNoPage(id obj)</span><br><span class="line">                    ├── AutoreleasePoolPage(AutoreleasePoolPage *newParent)</span><br><span class="line">                    └── id *add(id obj)</span><br></pre></td></tr></table></figure>
+<p>在<code>autorelease</code> 方法的调用栈中，最终都会调用上面提到的 <code>autoreleaseFast</code> 方法，将当前对象加到<code>AutoreleasePoolPage</code> 中。</p>
+<p>这一小节中这些方法的实现都非常容易，只是进行了一些参数上的检查，最终还要调用 <code>autoreleaseFast</code> 方法.</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结:"></a>总结:</h3><hr>
+<p>以下是对<code>AutoreleasePool</code>的结构和原理进行总结</p>
+<ul>
+<li>自动释放池是由 <code>AutoreleasePoolPage</code>以双向链表的方式实现的</li>
+<li>当对象调用 <code>autorelease</code> 方法时，会将对象加入 <code>AutoreleasePoolPage</code> 的栈中</li>
+<li>调用 <code>AutoreleasePoolPage::pop</code>方法会向栈中的对象发送 <code>release</code> 消息</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h3&gt;&lt;hr&gt;
+&lt;p&gt;接着上回书说到关于&lt;code&gt;AutoreleasePool&lt;/code&gt;的内部构造，那我们就来看看&lt;code&gt;Autorelea
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+    
+    
+      <category term="AutoreleasePool" scheme="http://yoursite.com/tags/AutoreleasePool/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>了解内存管理--ARC（一）</title>
+    <link href="http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--ARC/"/>
+    <id>http://yoursite.com/2016/08/14/内存管理--ARC/</id>
+    <published>2016-08-14T02:38:27.000Z</published>
+    <updated>2016-08-14T14:41:30.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><hr>
+<p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!</p>
+<h3 id="ARC是什么"><a href="#ARC是什么" class="headerlink" title="ARC是什么"></a>ARC是什么</h3><hr>
+<p>ARC是<code>(Automatic Reference Counting)</code>的缩写。就是自动引用计数,在LLVM编译器中设置ARC为有效状态，就无需再次键入retian或者release代码。</p>
+<p>官方文档介绍ARC:</p>
+<blockquote>
+<p>在Objective-C中采用ARC机制，让编译器来进行内存管理。在新一代Apple LLVM 编译器中设置ARC为有效状态，就无需再次键入retain或者release代码，这在降低程序崩溃、内存泄漏等风险的同时，很大程度上减小了开发程序的工作量。编译器完全清楚目标对象，并能立刻释放那些不再被使用的对象。如此一来，应用程序将具有可预测性，且能流畅运行，速度也将大幅度提升。</p>
+</blockquote>
+<h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><hr>
+<p>那我们简单了解一下什么是引用计数,在iOS 5在WWDC中引入了自动计数功能,也就是说在iOS 5时代之前只有经历过的人才知道那是多么痛苦的事情（虽然我没有经历过)。</p>
+<ul>
+<li><p>在MRC模式下我们需要考虑对象的释放和增加,生成对象的时候它会有一个引用计数,可以增加1，也可以减少1.当引用计数为0的时候就会释放对象.</p>
+</li>
+<li><p>在ARC模式下简单的来说就是就无需手动键入retian或者release代码,有编译器为你自动管理引用计数功能.我们不能手动retain/release来管理释放，必须交给自动释放池来管理。ARC能够解决大部分的内存泄露问题，但是有很多问题应该注意，如循环引用.</p>
+</li>
+</ul>
+<p>如果想了解深入了解retain和release原理可以浏览<a href="http://draveness.me/rr/" target="_blank" rel="external">黑箱中的 retain 和 release</a></p>
+<h3 id="autoreleasepool-—-自动释放池"><a href="#autoreleasepool-—-自动释放池" class="headerlink" title="autoreleasepool — 自动释放池"></a>autoreleasepool — 自动释放池</h3><hr>
+<p>因为有<code>autoreleasepool</code>你猜可以不用考滤内存管理,可能在你不注意的时候会有<code>main</code>函数中就有一个大的自动释放池.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, char * argv[]) &#123;  </span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意:整个应用程序都被包括在自动释放池中的Block中,也会涉及到Runloop的相关知识,如果你想了解Runloop相关知识请猛戳<a href="http://ialexsun.cn/2016/07/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E4%BA%86%E8%A7%A3Runloop/" target="_blank" rel="external">深入浅出了解Runloop</a>文中会详细介绍关于Runloop如何在autoreleasepool中应用的.</p>
+<hr>
+<p>回到主话题自动释放池,让我们看一下经过编译器改写的这段代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct __AtAutoreleasePool &#123;  </span><br><span class="line">  __AtAutoreleasePool() &#123;atautoreleasepoolobj = objc_autoreleasePoolPush();&#125;</span><br><span class="line">  ~__AtAutoreleasePool() &#123;objc_autoreleasePoolPop(atautoreleasepoolobj);&#125;</span><br><span class="line">  void * atautoreleasepoolobj;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>你会发现这个结构体中会有<code>objc_autoreleasePoolPush</code> <code>objc_autoreleasePoolPop</code>两个方法，那我们可以推测出来,<br>在<code>main</code>函数中<code>@autoreleasepool</code>只是通过上述的两个方法来进行工作的.如果想深入了解一下这两个方法.那我们就读一读这篇文章吧。<a href="http://ialexsun.cn/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/" target="_blank" rel="external">内存管理–AutoreleasePool（二）</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h3&gt;&lt;hr&gt;
+&lt;p&gt;由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+    
+    
+      <category term="ARC" scheme="http://yoursite.com/tags/ARC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>离屏渲染的性能优化</title>
+    <link href="http://yoursite.com/2016/08/11/%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E4%BC%98%E5%8C%96/"/>
+    <id>http://yoursite.com/2016/08/11/离屏渲染的优化/</id>
+    <published>2016-08-11T02:38:27.000Z</published>
+    <updated>2016-08-11T15:09:27.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><hr>
+<p>圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在,What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？的确,数量少的圆角不会带来离屏渲染导致掉帧的问题,但是你是否有过20，30，40….或者更多的圆角呢？如果有过你一定知道带来的后果,废话少说,切入正题。</p>
+<h3 id="离屏渲染"><a href="#离屏渲染" class="headerlink" title="离屏渲染"></a>离屏渲染</h3><hr>
+<p>OpenGL中，GPU屏幕渲染有以下两种方式： On-Screen Rendering 意为当前屏幕渲染，指的是GPU的渲染操作是在当前用于显示的屏幕缓冲区中进行。 Off-Screen Rendering 意为离屏渲染，指的是GPU在当前屏幕缓冲区以外新开辟一个缓冲区进行渲染操作。</p>
+<p>相比于当前屏幕渲染，离屏渲染的代价是很高的，主要体现在两个方面： 创建新缓冲区 要想进行离屏渲染，首先要创建一个新的缓冲区。 上下文切换 离屏渲染的整个过程，需要多次切换上下文环境：先是从当前屏幕（On-Screen）切换到离屏（Off-Screen）；</p>
+<p>等到离屏渲染结束以后，将离屏缓冲区的渲染结果显示到屏幕上有需要将上下文环境从离屏切换到当前屏幕。而上下文环境的切换是要付出很大代价的。 哪些行为会导致Offscreen rendering?(这些只是官方语言,就是告诉你离屏渲染是怎么回事，不理解的话接着往下看),其实官方早在2011年的WWDC上就提到了离屏渲染的效果<a href="https://developer.apple.com/videos/play/wwdc2011/121/" target="_blank" rel="external">WWDC 2011: Understanding UIKit Rendering </a>.</p>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/8db566ed88484924.png" alt=""></p>
+<p><a href="https://developer.apple.com/videos/play/wwdc2014/419/" target="_blank" rel="external">WWDC 2014: Advanced Graphics and Animations for iOS Apps</a>演示了「Color Offscreen-Renderd Yellow」这个工具的使用!本文主要是为了总结有几种优化方式和背后的原理!</p>
+<h3 id="设置圆角带来的问题"><a href="#设置圆角带来的问题" class="headerlink" title="设置圆角带来的问题"></a>设置圆角带来的问题</h3><hr>
+<p><code>view.layer.cornerRadius = 5</code>你可能会问平时就是这么写的,还有<br><code>view.layer.masksToBounds = YES;</code>一起写的,确实文章开头就提到少量的设置圆角不会产生掉帧的问题。让我们测试一下果然出现了我们想要的性能损耗(并不是幸灾乐祸哦)<img src="http://ac-mcm5vzvc.clouddn.com/eec6379187bc5188.png" alt="">,</p>
+<h4 id="重新绘制方案"><a href="#重新绘制方案" class="headerlink" title="重新绘制方案:"></a>重新绘制方案:</h4><p>网上有很多的方法是通过 Core Graphics 画出圆角,实际重新绘制会出现新的问题。</p>
+<ul>
+<li>1.绘制后把圆角缓存在磁盘里，第二次加载直接使用缓存的圆角图像。</li>
+<li>2.直接保存在内存中,内存不足的情况下好像不是最好的方案!圆角使用UIImageView来处理。</li>
+</ul>
+<p>简单来说，底层铺一个UIImageView,然后用GraphicsContext生成一张带圆角的图。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">@implementation UIImage (RoundedCorner)</span><br><span class="line"></span><br><span class="line">- (UIImage *)yal_imageWithRoundedCornersAndSize:(CGSize)sizeToFit andCornerRadius:(CGFloat)radius</span><br><span class="line">&#123;</span><br><span class="line">    CGRect rect = (CGRect)&#123;0.f, 0.f, sizeToFit&#125;;</span><br><span class="line"></span><br><span class="line">    UIGraphicsBeginImageContextWithOptions(sizeToFit, NO, UIScreen.mainScreen.scale);</span><br><span class="line">    CGContextAddPath(UIGraphicsGetCurrentContext(),</span><br><span class="line">                     [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:radius].CGPath);</span><br><span class="line">    CGContextClip(UIGraphicsGetCurrentContext());</span><br><span class="line"></span><br><span class="line">    [self drawInRect:rect];</span><br><span class="line">    UIImage *output = UIGraphicsGetImageFromCurrentImageContext();</span><br><span class="line"></span><br><span class="line">    UIGraphicsEndImageContext();</span><br><span class="line"></span><br><span class="line">    return output;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>原理其实就是利用 Core Graphics 自己画出了一个圆角矩形.还有的小伙伴把这个过程封装了起来，如果你喜欢这种方式也可以使用封装好的这种方式<a href="https://github.com/raozhizhen/JMRoundedCorner" target="_blank" rel="external">JMRoundedCorner</a>可以下载研究一下原理，个人认为大部分情况下可以使用这种方案来使用!</p>
+<h3 id="混合图层方案："><a href="#混合图层方案：" class="headerlink" title="混合图层方案："></a>混合图层方案：</h3><p>在要添加圆角的视图上再叠加一个部分透明的视图，只对圆角部分进行遮挡。实际中有这种需求的基本是制造圆形头像，普通的圆角遮罩需要这种，如果叠加的视图都一样，可以只加载一次遮罩图片以减少内存占用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CAShapeLayer *layer = [CAShapeLayer layer];  </span><br><span class="line">UIBezierPath *aPath = [UIBezierPath bezierPathWithOvalInRect:aImageView.bounds];  </span><br><span class="line">layer.path = aPath.CGPath;  </span><br><span class="line">aImageView.layer.mask = layer;</span><br></pre></td></tr></table></figure>
+<p>这种方案同样也有小伙伴封装好了的方案<a href="https://gist.github.com/seedante" target="_blank" rel="external">Draw a transparent image</a>在一个设置<code>opaque = false的 CGContext</code>里，设定填充颜色然后用两条贝塞尔曲线围成一个封闭区域，最后从这个绘制环境导出图像即可。</p>
+<h3 id="Rasterization方案"><a href="#Rasterization方案" class="headerlink" title="Rasterization方案:"></a>Rasterization方案:</h3><p>离屏渲染本来是个优化设计，如何物尽其用?</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cell.layer.shouldRasterize = true</span><br><span class="line">cell.layer.rasterizationScale = cell.layer.contentsScale</span><br></pre></td></tr></table></figure>
+<p>如果视图内容是动态变化的，使用 Rasterization 有可能让性能变得更糟。什么情况下会遇到动态内容的视图呢，能想到的只有后台下载图片完毕后切换到主线程设置这种了。<br><img src="http://ac-mcm5vzvc.clouddn.com/8262934ab7ba3e5e.png" alt=""><br>从结果来看，开启 Rasterization 后 GPU 的利用率始终不高，如果 CPU 的利用率控制得当的话 FPS 不会难看，比预计的性能要好多了。</p>
+<h3 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h3><hr>
+<p>Rasterization：适用于静态内容的视图，也就是内部结构和内容不发生变化的视图，对上面的所有效果而言，在实现成本以及性能上最均衡的。即使是动态变化的视图，开启 Rasterization 后能够有效降低 GPU 的负荷，不过在动态视图里是否启用还是看 Instruments 的数据。</p>
+<p>规避离屏渲染:用其他手法来模拟效果，混合图层是个性能最好、耗能最少的通用优化方案，尤其对于 rounded corer 和 mask。</p>
+<p>建议大家还是采取预先生成圆角图片，并缓存起来这个方法才是比较好的手段。预处理圆角图片可以在后台处理，处理完毕后缓存起来，再在主线程显示，这就避免了不必要的离屏渲染了。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料:"></a>参考资料:</h3><hr>
+<p><a href="http://www.reviewcode.cn/article.html?reviewId=7" target="_blank" rel="external">关于性能的一些问题</a></p>
+<p><a href="http://blog.raozhizhen.com/post/uiviewshe-zhi-bu-hong-fa-chi-ping-xuan-ran-de-yuan-jiao" target="_blank" rel="external">UIView设置不触发离屏渲染的圆角</a></p>
+<p><a href="https://bestswifter.com/efficient-rounded-corner" target="_blank" rel="external">iOS 高效添加圆角效果实战讲解</a></p>
+<p><a href="http://www.jianshu.com/p/ca51c9d3575b" target="_blank" rel="external">离屏渲染优化详解：实例示范+性能测试</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h3&gt;&lt;hr&gt;
+&lt;p&gt;圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不
+    
+    </summary>
+    
+      <category term="日志" scheme="http://yoursite.com/categories/%E6%97%A5%E5%BF%97/"/>
+    
+    
+      <category term="离屏渲染" scheme="http://yoursite.com/tags/%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/"/>
+    
+      <category term="性能优化" scheme="http://yoursite.com/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>深入浅出了解Runloop</title>
+    <link href="http://yoursite.com/2016/07/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E4%BA%86%E8%A7%A3Runloop/"/>
+    <id>http://yoursite.com/2016/07/24/深入浅出了解Runloop/</id>
+    <published>2016-07-24T02:38:27.000Z</published>
+    <updated>2016-08-14T14:47:52.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念以及底层实现原理.学习了大神的Runloop的讲解,有了一定的理解了Runloop,这个词在我的认知中不再只是一个简单的 “跑圈” 的程度,但是也不会理解的很透,日后有机会会更加深入学习关于底层知识的.</p>
+<h2 id="Runloop基本概念"><a href="#Runloop基本概念" class="headerlink" title="Runloop基本概念"></a>Runloop基本概念</h2><p>很多人都知道Runloop浅显的意思 “跑圈” “循环”啊,如果深入一点的话就是用一个do while一个死循环来跑圈的,接下来就让我们看看Runloop是如何进行跑圈的吧！</p>
+<ul>
+<li><p>RunLoop的基本作用:</p>
+<ul>
+<li><p>保持程序的持续运行</p>
+</li>
+<li><p>处理APP中各种事件(比如:触摸事件,定时器事件，Selector事件等)</p>
+</li>
+<li>能节省CPU资源，提高程序的性能:该做事的时候就唤醒，没有事情就睡眠</li>
+</ul>
+</li>
+</ul>
+<h2 id="Runloop与多线程"><a href="#Runloop与多线程" class="headerlink" title="Runloop与多线程"></a>Runloop与多线程</h2><p>一般情况下一个线程只能执行一次任务后就会退出,我们不能让程序像命令行一样执行完命令就推出,我们都知道程序的main函数是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, char * argv[]) &#123;</span><br><span class="line">  @autoreleasepool &#123;</span><br><span class="line">      return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>默认启动的Runloop是在<code>UIApplicationMain</code>函数内部启动与主线程相关联.</li>
+<li><p>RunLoop在第一次获取时创建，在线程结束时销毁.</p>
+</li>
+<li><p>般情况下一个线程只对应一个Runloop,子线程的Runoop需要手动启动(调run方法).</p>
+</li>
+</ul>
+<h3 id="RunLoop与对象"><a href="#RunLoop与对象" class="headerlink" title="RunLoop与对象"></a>RunLoop与对象</h3><ul>
+<li><p>RunLoop实际上就是一个对象,来处理事件和消息,iOS中有两套API使用RunLoop</p>
+<ul>
+<li>Foundation框架中的<code>NSRunLoop</code>;</li>
+<li>Core Foundation中的<code>CFRunLoopRef</code>;</li>
+</ul>
+</li>
+<li><p><code>CFRunLoopRef</code> 是基于存C语言开发的API,<code>NSRunLoop</code>只是基于OC对<br><code>CFRunLoopRef</code> 进行的封装,所以我们这篇文章应该主要进行对<code>CFRunLoopRef</code> 深入研究,才能了解RunLoop的原理和执行.<code>CFRunLoopRef</code> 的代码是开源的，你可以下载源码<a href="http://opensource.apple.com/tarballs/CF/" target="_blank" rel="external">CFRunLoopRef</a>进行深入了解.<a href="https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html" target="_blank" rel="external">苹果官方文档</a></p>
+</li>
+<li><p>苹果不允许直接创建 RunLoop，官方提供了两个RunLoop获取函数(这里忽略 NSRunLoop的两个函数)- </p>
+<ul>
+<li>Core Foundation框架中<code>CFRunLoopGetCurrent()</code> <code>CFRunLoopGetMain()</code>可以进行测试发现,线程创建后不会有Runloop,当调用<code>CFRunLoopGetCurrent()</code>或<code>CFRunLoopGetMain()</code>函数时候才会第一次创建Runloop.</li>
+</ul>
+</li>
+</ul>
+<h2 id="Runloop的内部结构"><a href="#Runloop的内部结构" class="headerlink" title="Runloop的内部结构"></a>Runloop的内部结构</h2><p><img src="http://ac-mcm5vzvc.clouddn.com/7daf2abb34432dcc.png" alt=""><br>一个线程只能对应一个Runloop,可以有若干Mode,一个Mode可以若干个Timer/Observer/Source.每次只能进入一个Mode,这个Model叫做CurrentMode.如果想切换模式,一定要先退出当前Mode.</p>
+<ul>
+<li><p>系统默认注册了5中Mode:</p>
+<ul>
+<li><p><code>NSDefaultRunLoopMode</code>:默认的Mode，通常主线程的RunLoop是在这个Mode下运行</p>
+<ul>
+<li><p><code>UITrackingRunLoopMode</code>:界面跟踪Mode，当用户与界面交互的时候会在此Mode下运行</p>
+</li>
+<li><p><code>NSRunLoopCommonModes</code>:这个不是一种真正的Mode，是一个占位用的Mode</p>
+</li>
+<li><p>UIInitializationRunLoopMode:程序启动时的Mode，启动完成后就不在此Mode下</p>
+</li>
+<li>GSEventReceiveRunLoopMode:接受系统事件的内部Mode，一般我们用不到</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><h3 id="关于Core-Foundation里面RunLoop-的类"><a href="#关于Core-Foundation里面RunLoop-的类" class="headerlink" title="关于Core Foundation里面RunLoop 的类"></a>关于Core Foundation里面RunLoop 的类</h3><ul>
+<li><p>CFRunLoopModeRef:<br>CFRunLoopModeRef 类并没有对外暴露,只是通过 CFRunLoopRef 的接口进行了封装</p>
+<ul>
+<li>CFRunLoopSourceRef(事件源):Source有两个版本：Source0 和 Source1。</li>
+<li><p>Source0:非基于Port的</p>
+</li>
+<li><p>Source1 基于Port的，通过内核和其他线程通信，接收、分发系统事件,这种 Source 能主动唤醒 RunLoop 的线程.    </p>
+</li>
+<li><p>CFRunLoopTimerRef(定时器):CFRunLoopTimerRef是基于时间的触发器,基本上说的就是NSTimer，它受RunLoop Mode的影响。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   // 创建一个定时器</span><br><span class="line">	 NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 		target:self selector:@selector(run) userInfo:nil 		repeats:YES];</span><br><span class="line">拽了界面上的某个控件(会切换成UITrackingRunLoopMode)</span><br><span class="line">  [[NSRunLoop mainRunLoop]addTimer:timer forMode:NSDefaultRunLoopMode];// NSDefaultRunLoopMode:NSTimer只有在默认模式下	(NSDefaultRunLoopMode)工作，切换到其他模式不再工作，比如拖</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>  ·NSRunLoopCommonModes仅仅是标记NSTimer在两种模式(UITrackingRunLoopMode/NSDefaultRunLoopMode)下都能运行,但一个RunLoop中同一时间内只能运行一种模式.<code>UITrackingRunLoopMode</code>拖拽UI界面时出发定时器,在默认模式(NSDefaultRunLoopMode)下不工作</p>
+<pre><code>- CFRunLoopObserverRef(观察者):可以通过CFRunLoopObserverRef来监听RunLoop状态的改变
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity)&#123;</span><br><span class="line">   kCFRunLoopEntry         = (1UL &lt;&lt; 0), //状态值:1 即将进入Loop</span><br><span class="line">   kCFRunLoopBeforeTimers  = (1UL &lt;&lt; 1),//状态值:2 即将处理 Timer</span><br><span class="line">   kCFRunLoopBeforeSources = (1UL &lt;&lt; 2),//状态值:4 即将处理Source</span><br><span class="line">   kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5),//状态值:32 即将进入休眠        </span><br><span class="line">   kCFRunLoopAfterWaiting  = (1UL &lt;&lt; 6),//状态值:64 刚从休眠中唤醒</span><br><span class="line">   kCFRunLoopExit          = (1UL &lt;&lt; 7),//状态值:128 即将退出Loop</span><br><span class="line">   kCFRunLoopAllActivities = 0x0FFFFFFFU // 表示监听上面所有的状态</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>可以通过以下代码测试RunLoop状态发生改变对应的状态值:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CFRunLoopObserverRef observer =CFRunLoopObserverCreateWithHandler(CFAllocatorGetDefault(), kCFRunLoopAllActivities, YES, 0, ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) &#123;</span><br><span class="line">     NSLog(@&quot;----RunLoop状态发生改变---%zd&quot;, activity);</span><br><span class="line"> &#125;);</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CFRunLoopAddObserver(CFRunLoopGetCurrent(),observer,</span><br><span class="line">kCFRunLoopDefaultMode);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CFRelease(observer); //观察者要手动释放</span><br></pre></td></tr></table></figure>
+<p>上面是Mode中必须包含的元素,Source/Timer/Observer可以都有,也可以只有一个,如果一个都没有会直接退出Runloop状态,不进入循环。</p>
+<h4 id="PS-看iOS线下分享Runloop深入了解的时候-大家讨论为什么状态为什么会没有3和4-是不是被官方干掉了！仅供娱乐-哪位了解到可以给我留言"><a href="#PS-看iOS线下分享Runloop深入了解的时候-大家讨论为什么状态为什么会没有3和4-是不是被官方干掉了！仅供娱乐-哪位了解到可以给我留言" class="headerlink" title="PS:看iOS线下分享Runloop深入了解的时候,大家讨论为什么状态为什么会没有3和4,是不是被官方干掉了！仅供娱乐,哪位了解到可以给我留言."></a>PS:看<a href="http://v.youku.com/v_show/id_XODgxODkzODI0.html" target="_blank" rel="external">iOS线下分享Runloop深入了解</a>的时候,大家讨论为什么状态为什么会没有3和4,是不是被官方干掉了！仅供娱乐,哪位了解到可以给我留言.</h4><h2 id="Runloop处理顺序"><a href="#Runloop处理顺序" class="headerlink" title="Runloop处理顺序"></a>Runloop处理顺序</h2><p>官方提供:<br><img src="http://ac-mcm5vzvc.clouddn.com/4671e9e78cd86ee1.png" alt=""></p>
+<p>网友提供(易于理解):<br><img src="http://ac-mcm5vzvc.clouddn.com/6d40150bdeb3e504.png" alt=""></p>
+<p>上图是Runloop处理顺序,可以看到，实际上 RunLoop 就是这样一个函数，其内部是一个 do-while 循环。当你调用 CFRunLoopRun() 时，线程就会一直停留在这个循环里；直到超时或被手动停止，该函数才会返回。</p>
+<h2 id="Runloop实际应用"><a href="#Runloop实际应用" class="headerlink" title="Runloop实际应用"></a>Runloop实际应用</h2><ul>
+<li>ImageView显示:图片刷新(假如界面要刷新N多图片(渲染)，此时用户拖拽UI控件就会出现卡的效果,可以通过RunLoop实现)</li>
+</ul>
+<pre><code>[self.myImageView performSelector:@selector(setImage:) withObject:[UIImage imageNamed:@&quot;0&quot;] afterDelay:2.0 inModes:@[NSDefaultRunLoopMode]];
+</code></pre><ul>
+<li>常驻线程:(让子线程不进入消亡状态,等待其他线程发来消息,子线程中加入RunLoop+Source/Timer/Observer)</li>
+</ul>
+<pre><code>[[NSRunLoop currentRunLoop] addPort:[NSPort port] forMode:NSDefaultRunLoopMode];
+[[NSRunLoop currentRunLoop] run];
+</code></pre><ul>
+<li>自动释放池:释放池在Runloop睡眠前等待唤醒前是释放一次,进入下一次Runloop循环的时候又创建一次.创建子线程外面要有一个大的Runloop包住.<ul>
+<li>自动释放池的原理:实际上因为<code>AutoreleasePool</code>会调用<code>objc_autoreleasePoolPop ``objc_autoreleasePoolPush</code>方法。<a href="http://ialexsun.cn/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/" target="_blank" rel="external">自动释放池的原理深入了解</a></li>
+</ul>
+</li>
+</ul>
+<p>友情链接:<a href="http://blog.ibireme.com/2015/05/18/runloop/" target="_blank" rel="external">深入理解RunLoop</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+    
+    
+      <category term="Runloop" scheme="http://yoursite.com/tags/Runloop/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>关于GCD你应该知道的那点事</title>
+    <link href="http://yoursite.com/2016/07/06/%E5%85%B3%E4%BA%8EGCD%E4%BD%A0%E5%BA%94%E8%AF%A5%E7%9F%A5%E9%81%93%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B/"/>
+    <id>http://yoursite.com/2016/07/06/关于GCD你应该知道的那点事/</id>
+    <published>2016-07-06T02:38:27.000Z</published>
+    <updated>2016-08-11T15:32:48.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
+<h3 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h3><ul>
+<li><p>一个应用程序开启一定会有一个进程,<code>必须</code>得有线程（每1个进程至少要有1条线程）.一个进程（程序）的所有任务都在线程中执行。</p>
+</li>
+<li><p>一个线程的任务是<code>串行</code>的,如果执行多个任务就要一个接着一个的按顺序的执行下去</p>
+</li>
+</ul>
+<h3 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h3><ul>
+<li><p>如果开启多线程就会每条线程并行的执行任务,可以大大提高开发效率,比如可以同时开启3条线程同时下载3个文件.</p>
+</li>
+<li><p>同一个时间内CPU只能处理一个线程,只有一条线程在<code>执行</code>.那么为什么还会出现<code>并发</code>执行?因为CPU在快速的在多线程中快速的<code>调度</code>(切换),如果时间足够快那么就会造成多线程并发的假象。是不是线程越多就越好? </p>
+</li>
+<li><code>如果线程多到CPU切换不过来,CPU会非常消耗资源，CPU会累死，每条线程被调度到的频率大大降低,所以应该合理使用多线程</code>.  </li>
+</ul>
+<h3 id="ios程序中使用的多线程种类"><a href="#ios程序中使用的多线程种类" class="headerlink" title="ios程序中使用的多线程种类"></a>ios程序中使用的多线程种类</h3><ul>
+<li>pthread:C语言,跨平台，复杂(使用较少).</li>
+<li>NSThread:面向对象，程序员管理(使用较少).</li>
+<li>GCD:利用CPU多核技术进行多线程开发(经常使用).</li>
+<li><p>NSOperation:将同步与异步函数封装在内部(经常使用).</p>
+<p><img src="http://ac-mcm5vzvc.clouddn.com/cd2caa657a209753.png" alt=""></p>
+</li>
+</ul>
+<h3 id="什么是GCD"><a href="#什么是GCD" class="headerlink" title="什么是GCD"></a>什么是GCD</h3><p>GCD(Grand Central Dispatch)作为纯C语言一个处理多线程，提供非常多强大的函数,自从iOS4.0被引入后。GCD依然是目前Apple开发的一个官网推荐的多核编程的开发方法。GCD 是一个可以替代诸如 NSThread, NSOperationQueue, NSInvocationOperation等技术的很高效和强大的技术。</p>
+<h3 id="GCD常用函数"><a href="#GCD常用函数" class="headerlink" title="GCD常用函数"></a>GCD常用函数</h3><ul>
+<li><p>GCD分为异步函数,同步函数</p>
+</li>
+<li><p>异步函数(async):</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_async(dispatch_queue_t queue(), ^&#123;</span><br><span class="line">    //something           </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">dispatch_queue_t //可以自定义,也可以使用系统的队列</span><br><span class="line">dispatch_get_global_queue(0, 0)//全局队列 </span><br><span class="line">dispatch_get_main_queue()//主线程的主队列</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>异步函数 + 主队列：只在主线程中执行任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得主队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_main_queue();</span><br><span class="line">       </span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">  NSLog(@&quot;dispatch_async(queue, ^&#123;  	         	</span><br><span class="line">     NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>异步函数 + 并发队列：可以同时开启多条线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得全局的并发队列</span><br><span class="line">dispatch_queue_t queue =dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;);</span><br><span class="line"></span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">   for (NSInteger i = 0; i&lt;10; i++) &#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>异步函数 + 串行队列：会开启新的线程，但是任务是串行的，执行完一个任务，再执行下一个任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 1.创建串行队列</span><br><span class="line">dispatch_queue_t queue = dispatch_queue_create(&quot;com.520it.queue&quot;, DISPATCH_QUEUE_SERIAL);</span><br><span class="line"></span><br><span class="line">//dispatch_queue_t queue = dispatch_queue_create(&quot;com.ialexsun.cn.queue&quot;, NULL);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_async(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>同步函数(sync):</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_sync(dispatch_queue_t queue(), ^&#123;</span><br><span class="line">//something           </span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">dispatch_queue_t //可以自定义,也可以使用系统的队列</span><br><span class="line">dispatch_get_global_queue(0, 0)//全局队列 </span><br><span class="line">dispatch_get_main_queue()//主线程的主队列</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>同步函数 + 主队列：只在主线程中执行任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得主队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_main_queue();</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>同步函数 + 并发队列：不会开启新的线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 1.获得全局的并发队列</span><br><span class="line">dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>同步函数 + 串行队列：不会开启新的线程，在当前线程执行任务。任务是串行的，执行完一个任务，再执行下一个任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 1.创建串行队列</span><br><span class="line">dispatch_queue_t queue = dispatch_queue_create(&quot;com.ialexsun.queue&quot;, DISPATCH_QUEUE_SERIAL);</span><br><span class="line"></span><br><span class="line">// 2.将任务加入队列</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">NSLog(@&quot;1-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">NSLog(@&quot;2-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_sync(queue, ^&#123;</span><br><span class="line">NSLog(@&quot;3-----%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="异步函数和同步函数关系和区别"><a href="#异步函数和同步函数关系和区别" class="headerlink" title="异步函数和同步函数关系和区别:"></a>异步函数和同步函数关系和区别:</h2><p><img src="http://ac-mcm5vzvc.clouddn.com/0f4058fa7bf5cb96.png" alt=""></p>
+<p>GCD函数基本使用,GCD内容比较多，由于最近事情比较多所以先列举以上几个函数,后期会持续更新关于GCD的问题.</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h3&gt;&lt;p&gt;为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+    
+    
+      <category term="多线程" scheme="http://yoursite.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    
+      <category term="GCD" scheme="http://yoursite.com/tags/GCD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>如何使用CocoaPods添加第三方库</title>
+    <link href="http://yoursite.com/2015/08/30/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%B8%8A%E6%9E%B6App%E7%9A%84%E5%9D%91/"/>
+    <id>http://yoursite.com/2015/08/30/第一次上架App的坑/</id>
+    <published>2015-08-30T02:38:27.000Z</published>
+    <updated>2017-02-19T07:52:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>前言</p>
+<p>最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。</p>
+<p>优点:方便,直接拖入操作简单<br>缺点:审核时候会产生各种奇葩的错误</p>
+<p>在项目开始时候不知道动态库会有很多坑,也可能操作姿势不对.这都不重要了，主要想记录一下如何使用CocoaPods添加第三方库.<br>可以避免很多不必要的麻烦,第三方库更新也不用手动管理.</p>
+<p>CocoaPods是iOS最常用的第三方类库管理工具，绝大部分有名的开源类库都支持CocoaPods,CocoaPods是用Ruby实现的，要想使用它首先需要有Ruby的环境。</p>
+<p>1.查看ruby环境，系统默认安装ruby环境</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -l</span><br></pre></td></tr></table></figure>
+<p>默认在终端中出现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">*** CURRENT SOURCES ***</span><br><span class="line">https://rubygems.org/</span><br></pre></td></tr></table></figure></p>
+<p>2.配置环境移除现有 Ruby 默认源，使用国内淘宝的ruby镜像, 命令如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources --remove https://rubygems.org/</span><br><span class="line">$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure></p>
+<p>3.验证新源是否替换成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -l</span><br></pre></td></tr></table></figure></p>
+<p>4.安装 CocoaPods(安装时间可能有些长，大小约700M左右)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install cocoapods</span><br><span class="line">$ pod setup</span><br></pre></td></tr></table></figure></p>
+<p>注意：苹果系统升级 OS X EL Capitan 后安装改为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install -n /usr/local/bin cocoapods</span><br><span class="line">$ pod setup</span><br></pre></td></tr></table></figure></p>
+<p>5.更新 gem<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem update --system</span><br></pre></td></tr></table></figure></p>
+<p>6.新建工程，并在终端用 cd 指令到文件夹内<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pod search 第三方(如:AFNetworking,填写需要的第三方库)</span><br></pre></td></tr></table></figure></p>
+<p>7.创建Podfile<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ vim Podfile</span><br></pre></td></tr></table></figure></p>
+<p>进入编写画面后按“i”进入编辑状态</p>
+<p>编辑 Podfile 文件，并写入要添加的第三方库<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">platform:ios, &apos;8.0&apos;</span><br><span class="line"></span><br><span class="line">pod &apos;AFNetworking&apos;, &apos;~&gt; 2.3.1&apos;&lt;-------第三方</span><br></pre></td></tr></table></figure></p>
+<p>结束编写装状态按“esc”，“:wq”保存退出。这时回到项目中</p>
+<p>8.安装第三方库<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pod install</span><br></pre></td></tr></table></figure></p>
+<p>恭喜你可以成功使用第三方库了.</p>
+<p>注意:安装成功后会出现你的项目结构多了XXX.xcworkspace等东西出来，以后使用XXX.xcworkspace进入项目中即可。</p>
+<h2 id="可能遇到的错误提示及解决方法："><a href="#可能遇到的错误提示及解决方法：" class="headerlink" title="可能遇到的错误提示及解决方法："></a>可能遇到的错误提示及解决方法：</h2><p>Error 1：<br>Error fetching <a href="http://ruby.taobao.org/" target="_blank" rel="external">http://ruby.taobao.org/</a>:</p>
+<p>bad response Not Found 404 (<a href="http://ruby.taobao.org/specs.4.8.gz" target="_blank" rel="external">http://ruby.taobao.org/specs.4.8.gz</a>)</p>
+<p>解决方案：把安装流程中<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -a http://ruby.taobao.org/</span><br></pre></td></tr></table></figure></p>
+<p>改为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -a https://ruby.taobao.org/</span><br></pre></td></tr></table></figure></p>
+<p>Error 2：<br>ERROR:  While executing gem … (Errno::EPERM)</p>
+<p>Operation not permitted - /usr/bin/pod</p>
+<p>解决方案：苹果系统升级 OS X EL Capitan 后会出现的插件错误，将安装流程(4) 安装 CocoaPods的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install cocoapods</span><br></pre></td></tr></table></figure></p>
+<p>改为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gem install -n /usr/local/bin cocoapods</span><br></pre></td></tr></table></figure></p>
+<p>＃以上很多借鉴了很多大神的博客,只是把遇到的坑和写的不足的地方总结在一起,站在巨人肩膀上进步的更快＃</p>
+<h2 id="PS-以下是自己引入动态库踩过得坑-如果各位遇到过可以借鉴以下："><a href="#PS-以下是自己引入动态库踩过得坑-如果各位遇到过可以借鉴以下：" class="headerlink" title="PS:以下是自己引入动态库踩过得坑,如果各位遇到过可以借鉴以下："></a>PS:以下是自己引入动态库踩过得坑,如果各位遇到过可以借鉴以下：</h2><p>引入动态库产生的App审核错误编码记录:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR ITMS-90087: &quot;Unsupported Architecture.The executable for XX.app/Frameworks/XXX.Framework  contains unsupported architecture&apos;[x86_64, i386]&apos;.&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR ITMS-90125: &quot;The Binary is invalid. The encryption info in the LC_ENCRYPTION_INFO load command is either missing or invalid, or the binary is already encrypted. This binary does not seem to have been built with Apple&apos;s Linker.&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR ITMS-90209: &quot;Invalid segment Alignment. The App Binary at XXX.app/Frameworks/xxx.framework/XXX does not have proper segment alignment. Try rebuilding the app with the latest xcode version.&quot; (I am already using the latest version.)</span><br></pre></td></tr></table></figure>
+<p>解决办法:在stackoverflow搜索的方法添加一段build phase在程序中可以解决</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">APP_PATH=&quot;$&#123;TARGET_BUILD_DIR&#125;/$&#123;WRAPPER_NAME&#125;&quot;</span><br><span class="line"></span><br><span class="line"># This script loops through the frameworks embedded in the application and</span><br><span class="line"># removes unused architectures.</span><br><span class="line">find &quot;$APP_PATH&quot; -name &apos;*.framework&apos; -type d | while read -r FRAMEWORK</span><br><span class="line">do</span><br><span class="line">FRAMEWORK_EXECUTABLE_NAME=$(defaults read &quot;$FRAMEWORK/Info.plist&quot; CFBundleExecutable)</span><br><span class="line">FRAMEWORK_EXECUTABLE_PATH=&quot;$FRAMEWORK/$FRAMEWORK_EXECUTABLE_NAME&quot;</span><br><span class="line">echo &quot;Executable is $FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line"></span><br><span class="line">EXTRACTED_ARCHS=()</span><br><span class="line"></span><br><span class="line">for ARCH in $ARCHS</span><br><span class="line">do</span><br><span class="line">echo &quot;Extracting $ARCH from $FRAMEWORK_EXECUTABLE_NAME&quot;</span><br><span class="line">lipo -extract &quot;$ARCH&quot; &quot;$FRAMEWORK_EXECUTABLE_PATH&quot; -o &quot;$FRAMEWORK_EXECUTABLE_PATH-$ARCH&quot;</span><br><span class="line">EXTRACTED_ARCHS+=(&quot;$FRAMEWORK_EXECUTABLE_PATH-$ARCH&quot;)</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo &quot;Merging extracted architectures: $&#123;ARCHS&#125;&quot;</span><br><span class="line">lipo -o &quot;$FRAMEWORK_EXECUTABLE_PATH-merged&quot; -create &quot;$&#123;EXTRACTED_ARCHS[@]&#125;&quot;</span><br><span class="line">rm &quot;$&#123;EXTRACTED_ARCHS[@]&#125;&quot;</span><br><span class="line"></span><br><span class="line">echo &quot;Replacing original executable with thinned version&quot;</span><br><span class="line">rm &quot;$FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line">mv &quot;$FRAMEWORK_EXECUTABLE_PATH-merged&quot; &quot;$FRAMEWORK_EXECUTABLE_PATH&quot;</span><br><span class="line"></span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<hr>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;前言&lt;/p&gt;
+&lt;p&gt;最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。&lt;/p&gt;
+&lt;p&gt;优点:方便,直接拖入操作简单&lt;br&gt;缺点:审核时候会产生各种奇葩的错误&lt;/p&gt;
+&lt;p&gt;在项目开始时候不知道动态库
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+    
+    
+      <category term="错误编码" scheme="http://yoursite.com/tags/%E9%94%99%E8%AF%AF%E7%BC%96%E7%A0%81/"/>
+    
+      <category term="App上架" scheme="http://yoursite.com/tags/App%E4%B8%8A%E6%9E%B6/"/>
+    
+      <category term="cocoapods" scheme="http://yoursite.com/tags/cocoapods/"/>
+    
+  </entry>
+  
+</feed>
