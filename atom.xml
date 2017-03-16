@@ -139,7 +139,7 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2017/01/18/%E4%BB%BF%E5%86%99Keep%E7%99%BB%E5%BD%95%E9%A1%B5/"/>
     <id>http://yoursite.com/2017/01/18/仿写Keep登录页/</id>
     <published>2017-01-18T12:18:27.000Z</published>
-    <updated>2017-03-13T02:45:26.000Z</updated>
+    <updated>2017-03-16T12:07:20.000Z</updated>
     
     <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
 <hr>
