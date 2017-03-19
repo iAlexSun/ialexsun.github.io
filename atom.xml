@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-03-19T06:54:48.000Z</updated>
+  <updated>2017-03-19T14:36:37.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,12 +20,10 @@
     <link href="http://yoursite.com/2017/02/04/JS%E4%B8%8E%E5%8E%9F%E7%94%9F%E4%BA%A4%E4%BA%92%E9%9B%86%E4%B8%AD%E6%96%B9%E5%BC%8F/"/>
     <id>http://yoursite.com/2017/02/04/JS与原生交互集中方式/</id>
     <published>2017-02-04T13:15:27.000Z</published>
-    <updated>2017-03-19T06:54:48.000Z</updated>
+    <updated>2017-03-19T14:36:37.000Z</updated>
     
-    <content type="html"><![CDATA[<p>发现有以下几种方法OC端与JS的交互大致有这几种：拦截协议、JavaScriptCore库、WKWebView、自定义NSURLProtocol拦截、WebViewJavascriptBridge。今天主要讲讲JavaScriptCore库的与OC端的交互。</p>
+    <content type="html"><![CDATA[<p>最近学习JS与原生交互发现一片新大陆,确切的说是WebView与JS交互在开发。发现有以下几种方法OC端与JS的交互大致有这几种：拦截协议、JavaScriptCore库、WKWebView、自定义NSURLProtocol拦截、WebViewJavascriptBridge。今天主要讲讲JavaScriptCore库的与OC端的交互。</p>
 <a id="more"></a>
-<h1 id="JS与原生交互几种方式"><a href="#JS与原生交互几种方式" class="headerlink" title="JS与原生交互几种方式"></a>JS与原生交互几种方式</h1><hr>
-<p>最近学习JS与原生交互发现一片新大陆,确切的说是WebView与JS交互在开发。发现有以下几种方法OC端与JS的交互大致有这几种：拦截协议、JavaScriptCore库、WKWebView、自定义NSURLProtocol拦截、WebViewJavascriptBridge。今天主要讲讲JavaScriptCore库的与OC端的交互。</p>
 <h1 id="1-JavaScriptCore"><a href="#1-JavaScriptCore" class="headerlink" title="1.JavaScriptCore"></a>1.JavaScriptCore</h1><p>JavaScriptCore一个iOS7引进的标准库，iOS7以前也有开发者自行导入使用。Web端也比较容易统一，JavaScriptCore可以理解为一个浏览器的运行内核，使用JavaScriptCore可以使用native代码（这里主要指objectiveC和swift）与js代码进行相互的调用，本文主要从几个方面进行了解。</p>
 <ul>
 <li>native调用js代码</li>
@@ -124,7 +122,7 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;p&gt;发现有以下几种方法OC端与JS的交互大致有这几种：拦截协议、JavaScriptCore库、WKWebView、自定义NSURLProtocol拦截、WebViewJavascriptBridge。今天主要讲讲JavaScriptCore库的与OC端的交互。&lt;/p&gt;
+      &lt;p&gt;最近学习JS与原生交互发现一片新大陆,确切的说是WebView与JS交互在开发。发现有以下几种方法OC端与JS的交互大致有这几种：拦截协议、JavaScriptCore库、WKWebView、自定义NSURLProtocol拦截、WebViewJavascriptBridge。今天主要讲讲JavaScriptCore库的与OC端的交互。&lt;/p&gt;
     
     </summary>
     
@@ -136,11 +134,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2017/01/18/%E4%BB%BF%E5%86%99Keep%E7%99%BB%E5%BD%95%E9%A1%B5/"/>
     <id>http://yoursite.com/2017/01/18/仿写Keep登录页/</id>
     <published>2017-01-18T12:18:27.000Z</published>
-    <updated>2017-03-19T06:56:00.000Z</updated>
+    <updated>2017-03-19T14:42:25.000Z</updated>
     
     <content type="html"><![CDATA[<p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
 <a id="more"></a>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
 <hr>
 <p>大家可以看一下效果图如下:</p>
 <p><img src="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif" alt=""></p>
@@ -192,14 +189,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/"/>
     <id>http://yoursite.com/2016/08/14/内存管理--AutoreleasePool/</id>
     <published>2016-08-14T14:38:27.000Z</published>
-    <updated>2017-03-19T06:58:26.000Z</updated>
+    <updated>2017-03-19T14:39:00.000Z</updated>
     
-    <content type="html"><![CDATA[<p>接着上回书说到关于<code>AutoreleasePool</code>的内部构造，那我们就来看看<code>AutoreleasePoolPage</code>中到底是如何运行的.</p>
+    <content type="html"><![CDATA[<p>接着上回书说到关于AutoreleasePool的内部构造，那我们就来看看AutoreleasePoolPage中到底是如何运行的.</p>
 <a id="more"></a>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><hr>
-<p>接着上回书说到关于<code>AutoreleasePool</code>的内部构造，那我们就来看看<code>AutoreleasePoolPage</code>中到底是如何运行的.</p>
-<h1 id="AutoreleasePoolPage-的结构"><a href="#AutoreleasePoolPage-的结构" class="headerlink" title="AutoreleasePoolPage 的结构"></a>AutoreleasePoolPage 的结构</h1><hr>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void *objc_autoreleasePoolPush(void) &#123;  </span><br><span class="line">    return AutoreleasePoolPage::push();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void objc_autoreleasePoolPop(void *ctxt) &#123;  </span><br><span class="line">    AutoreleasePoolPage::pop(ctxt);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="AutoreleasePoolPage-的结构"><a href="#AutoreleasePoolPage-的结构" class="headerlink" title="AutoreleasePoolPage 的结构"></a>AutoreleasePoolPage 的结构</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void *objc_autoreleasePoolPush(void) &#123;  </span><br><span class="line">    return AutoreleasePoolPage::push();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void objc_autoreleasePoolPop(void *ctxt) &#123;  </span><br><span class="line">    AutoreleasePoolPage::pop(ctxt);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>上面的方法看上去是对 AutoreleasePoolPage 对应静态方法 push 和 pop 的封装。那我们就深入了解一下<code>AutoreleasePoolPage</code>,<code>objc_autoreleasePoolPush</code>,<code>objc_autoreleasePoolPop</code>。</p>
 <p>AutoreleasePoolPage的结构:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class AutoreleasePoolPage &#123;  </span><br><span class="line">    magic_t const magic;</span><br><span class="line">    id *next;</span><br><span class="line">    pthread_t const thread;</span><br><span class="line">    AutoreleasePoolPage * const parent;</span><br><span class="line">    AutoreleasePoolPage *child;</span><br><span class="line">    uint32_t const depth;</span><br><span class="line">    uint32_t hiwat;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -298,7 +292,7 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;p&gt;接着上回书说到关于&lt;code&gt;AutoreleasePool&lt;/code&gt;的内部构造，那我们就来看看&lt;code&gt;AutoreleasePoolPage&lt;/code&gt;中到底是如何运行的.&lt;/p&gt;
+      &lt;p&gt;接着上回书说到关于AutoreleasePool的内部构造，那我们就来看看AutoreleasePoolPage中到底是如何运行的.&lt;/p&gt;
     
     </summary>
     
@@ -310,19 +304,16 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--ARC/"/>
     <id>http://yoursite.com/2016/08/14/内存管理--ARC/</id>
     <published>2016-08-14T02:38:27.000Z</published>
-    <updated>2017-03-19T06:57:51.000Z</updated>
+    <updated>2017-03-19T14:39:36.000Z</updated>
     
-    <content type="html"><![CDATA[<p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！</p>
+    <content type="html"><![CDATA[<p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!</p>
 <a id="more"></a>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!</p>
-<h1 id="ARC是什么"><a href="#ARC是什么" class="headerlink" title="ARC是什么"></a>ARC是什么</h1><hr>
-<p>ARC是<code>(Automatic Reference Counting)</code>的缩写。就是自动引用计数,在LLVM编译器中设置ARC为有效状态，就无需再次键入retian或者release代码。</p>
+<h1 id="ARC是什么"><a href="#ARC是什么" class="headerlink" title="ARC是什么"></a>ARC是什么</h1><p>ARC是<code>(Automatic Reference Counting)</code>的缩写。就是自动引用计数,在LLVM编译器中设置ARC为有效状态，就无需再次键入retian或者release代码。</p>
 <p>官方文档介绍ARC:</p>
 <blockquote>
 <p>在Objective-C中采用ARC机制，让编译器来进行内存管理。在新一代Apple LLVM 编译器中设置ARC为有效状态，就无需再次键入retain或者release代码，这在降低程序崩溃、内存泄漏等风险的同时，很大程度上减小了开发程序的工作量。编译器完全清楚目标对象，并能立刻释放那些不再被使用的对象。如此一来，应用程序将具有可预测性，且能流畅运行，速度也将大幅度提升。</p>
 </blockquote>
-<h1 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h1><hr>
-<p>那我们简单了解一下什么是引用计数,在iOS 5在WWDC中引入了自动计数功能,也就是说在iOS 5时代之前只有经历过的人才知道那是多么痛苦的事情（虽然我没有经历过)。</p>
+<h1 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h1><p>那我们简单了解一下什么是引用计数,在iOS 5在WWDC中引入了自动计数功能,也就是说在iOS 5时代之前只有经历过的人才知道那是多么痛苦的事情（虽然我没有经历过)。</p>
 <ul>
 <li><p>在MRC模式下我们需要考虑对象的释放和增加,生成对象的时候它会有一个引用计数,可以增加1，也可以减少1.当引用计数为0的时候就会释放对象.</p>
 </li>
@@ -330,8 +321,7 @@ NSLog(@&quot;Log: %@&quot;, data);
 </li>
 </ul>
 <p>如果想了解深入了解retain和release原理可以浏览<a href="http://draveness.me/rr/" target="_blank" rel="external">黑箱中的 retain 和 release</a></p>
-<h1 id="autoreleasepool-—-自动释放池"><a href="#autoreleasepool-—-自动释放池" class="headerlink" title="autoreleasepool — 自动释放池"></a>autoreleasepool — 自动释放池</h1><hr>
-<p>因为有<code>autoreleasepool</code>你猜可以不用考滤内存管理,可能在你不注意的时候会有<code>main</code>函数中就有一个大的自动释放池.</p>
+<h1 id="autoreleasepool-—-自动释放池"><a href="#autoreleasepool-—-自动释放池" class="headerlink" title="autoreleasepool — 自动释放池"></a>autoreleasepool — 自动释放池</h1><p>因为有<code>autoreleasepool</code>你猜可以不用考滤内存管理,可能在你不注意的时候会有<code>main</code>函数中就有一个大的自动释放池.</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, char * argv[]) &#123;  </span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>注意:整个应用程序都被包括在自动释放池中的Block中,也会涉及到Runloop的相关知识,如果你想了解Runloop相关知识请猛戳<a href="http://ialexsun.cn/2016/07/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E4%BA%86%E8%A7%A3Runloop/" target="_blank" rel="external">深入浅出了解Runloop</a>文中会详细介绍关于Runloop如何在autoreleasepool中应用的.</p>
 <hr>
@@ -342,7 +332,7 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;p&gt;由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！&lt;/p&gt;
+      &lt;p&gt;由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!&lt;/p&gt;
     
     </summary>
     
@@ -354,19 +344,17 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/08/11/%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E4%BC%98%E5%8C%96/"/>
     <id>http://yoursite.com/2016/08/11/离屏渲染的优化/</id>
     <published>2016-08-11T02:38:27.000Z</published>
-    <updated>2017-03-19T06:57:11.000Z</updated>
+    <updated>2017-03-19T14:41:22.000Z</updated>
     
-    <content type="html"><![CDATA[<p>圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在。What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？</p>
+    <content type="html"><![CDATA[<p>圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在。What? …</p>
 <a id="more"></a>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在,What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？的确,数量少的圆角不会带来离屏渲染导致掉帧的问题,但是你是否有过20，30，40….或者更多的圆角呢？如果有过你一定知道带来的后果,废话少说,切入正题。</p>
-<h1 id="离屏渲染"><a href="#离屏渲染" class="headerlink" title="离屏渲染"></a>离屏渲染</h1><hr>
-<p>OpenGL中，GPU屏幕渲染有以下两种方式： On-Screen Rendering 意为当前屏幕渲染，指的是GPU的渲染操作是在当前用于显示的屏幕缓冲区中进行。 Off-Screen Rendering 意为离屏渲染，指的是GPU在当前屏幕缓冲区以外新开辟一个缓冲区进行渲染操作。</p>
+<p>你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？的确,数量少的圆角不会带来离屏渲染导致掉帧的问题,但是你是否有过20，30，40….或者更多的圆角呢？如果有过你一定知道带来的后果,废话少说,切入正题。</p>
+<h1 id="离屏渲染"><a href="#离屏渲染" class="headerlink" title="离屏渲染"></a>离屏渲染</h1><p>OpenGL中，GPU屏幕渲染有以下两种方式： On-Screen Rendering 意为当前屏幕渲染，指的是GPU的渲染操作是在当前用于显示的屏幕缓冲区中进行。 Off-Screen Rendering 意为离屏渲染，指的是GPU在当前屏幕缓冲区以外新开辟一个缓冲区进行渲染操作。</p>
 <p>相比于当前屏幕渲染，离屏渲染的代价是很高的，主要体现在两个方面： 创建新缓冲区 要想进行离屏渲染，首先要创建一个新的缓冲区。 上下文切换 离屏渲染的整个过程，需要多次切换上下文环境：先是从当前屏幕（On-Screen）切换到离屏（Off-Screen）；</p>
 <p>等到离屏渲染结束以后，将离屏缓冲区的渲染结果显示到屏幕上有需要将上下文环境从离屏切换到当前屏幕。而上下文环境的切换是要付出很大代价的。 哪些行为会导致Offscreen rendering?(这些只是官方语言,就是告诉你离屏渲染是怎么回事，不理解的话接着往下看),其实官方早在2011年的WWDC上就提到了离屏渲染的效果<a href="https://developer.apple.com/videos/play/wwdc2011/121/" target="_blank" rel="external">WWDC 2011: Understanding UIKit Rendering </a>.</p>
 <p><img src="http://ac-mcm5vzvc.clouddn.com/8db566ed88484924.png" alt=""></p>
 <p><a href="https://developer.apple.com/videos/play/wwdc2014/419/" target="_blank" rel="external">WWDC 2014: Advanced Graphics and Animations for iOS Apps</a>演示了「Color Offscreen-Renderd Yellow」这个工具的使用!本文主要是为了总结有几种优化方式和背后的原理!</p>
-<h1 id="设置圆角带来的问题"><a href="#设置圆角带来的问题" class="headerlink" title="设置圆角带来的问题"></a>设置圆角带来的问题</h1><hr>
-<p><code>view.layer.cornerRadius = 5</code>你可能会问平时就是这么写的,还有<br><code>view.layer.masksToBounds = YES;</code>一起写的,确实文章开头就提到少量的设置圆角不会产生掉帧的问题。让我们测试一下果然出现了我们想要的性能损耗(并不是幸灾乐祸哦)<img src="http://ac-mcm5vzvc.clouddn.com/eec6379187bc5188.png" alt="">,</p>
+<h1 id="设置圆角带来的问题"><a href="#设置圆角带来的问题" class="headerlink" title="设置圆角带来的问题"></a>设置圆角带来的问题</h1><p><code>view.layer.cornerRadius = 5</code>你可能会问平时就是这么写的,还有<br><code>view.layer.masksToBounds = YES;</code>一起写的,确实文章开头就提到少量的设置圆角不会产生掉帧的问题。让我们测试一下果然出现了我们想要的性能损耗(并不是幸灾乐祸哦)<img src="http://ac-mcm5vzvc.clouddn.com/eec6379187bc5188.png" alt="">,</p>
 <h2 id="重新绘制方案"><a href="#重新绘制方案" class="headerlink" title="重新绘制方案:"></a>重新绘制方案:</h2><p>网上有很多的方法是通过 Core Graphics 画出圆角,实际重新绘制会出现新的问题。</p>
 <ul>
 <li>1.绘制后把圆角缓存在磁盘里，第二次加载直接使用缓存的圆角图像。</li>
@@ -394,7 +382,7 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;p&gt;圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在。What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？&lt;/p&gt;
+      &lt;p&gt;圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在。What? …&lt;/p&gt;
     
     </summary>
     
@@ -406,11 +394,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/07/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E4%BA%86%E8%A7%A3Runloop/"/>
     <id>http://yoursite.com/2016/07/24/深入浅出了解Runloop/</id>
     <published>2016-07-24T02:38:27.000Z</published>
-    <updated>2017-03-19T06:59:06.000Z</updated>
+    <updated>2017-03-19T14:38:25.000Z</updated>
     
     <content type="html"><![CDATA[<p>最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念以及底层实现原理.学习了大神的Runloop的讲解,有了一定的理解了Runloop,这个词在我的认知中不再只是一个简单的 “跑圈” 的程度,但是也不会理解的很透,日后有机会会更加深入学习关于底层知识的.</p>
 <a id="more"></a>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念以及底层实现原理.学习了大神的Runloop的讲解,有了一定的理解了Runloop,这个词在我的认知中不再只是一个简单的 “跑圈” 的程度,但是也不会理解的很透,日后有机会会更加深入学习关于底层知识的.</p>
 <h1 id="Runloop基本概念"><a href="#Runloop基本概念" class="headerlink" title="Runloop基本概念"></a>Runloop基本概念</h1><p>很多人都知道Runloop浅显的意思 “跑圈” “循环”啊,如果深入一点的话就是用一个do while一个死循环来跑圈的,接下来就让我们看看Runloop是如何进行跑圈的吧！</p>
 <ul>
 <li><p>RunLoop的基本作用:</p>
@@ -522,11 +509,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/07/06/%E5%85%B3%E4%BA%8EGCD%E4%BD%A0%E5%BA%94%E8%AF%A5%E7%9F%A5%E9%81%93%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B/"/>
     <id>http://yoursite.com/2016/07/06/关于GCD你应该知道的那点事/</id>
     <published>2016-07-06T02:38:27.000Z</published>
-    <updated>2017-03-19T06:56:22.000Z</updated>
+    <updated>2017-03-19T14:42:03.000Z</updated>
     
-    <content type="html"><![CDATA[<p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用</p>
+    <content type="html"><![CDATA[<p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了…</p>
 <a id="more"></a>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
+<p>GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
 <h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><ul>
 <li><p>一个应用程序开启一定会有一个进程,<code>必须</code>得有线程（每1个进程至少要有1条线程）.一个进程（程序）的所有任务都在线程中执行。</p>
 </li>
@@ -587,7 +574,7 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;p&gt;为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用&lt;/p&gt;
+      &lt;p&gt;为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了…&lt;/p&gt;
     
     </summary>
     
@@ -599,13 +586,12 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2015/08/30/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%B8%8A%E6%9E%B6App%E7%9A%84%E5%9D%91/"/>
     <id>http://yoursite.com/2015/08/30/第一次上架App的坑/</id>
     <published>2015-08-30T02:38:27.000Z</published>
-    <updated>2017-03-19T06:55:30.000Z</updated>
+    <updated>2017-03-19T14:42:35.000Z</updated>
     
-    <content type="html"><![CDATA[<p>最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。</p>
+    <content type="html"><![CDATA[<p>在项目开始时候不知道动态库会有很多坑,也可能操作姿势不对.这都不重要了，主要想记录一下如何使用CocoaPods添加第三方库.可以避免很多不必要的麻烦,第三方库更新也不用手动管理.</p>
 <a id="more"></a>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。</p>
+<p>最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。</p>
 <p>优点:方便,直接拖入操作简单<br>缺点:审核时候会产生各种奇葩的错误</p>
-<p>在项目开始时候不知道动态库会有很多坑,也可能操作姿势不对.这都不重要了，主要想记录一下如何使用CocoaPods添加第三方库.<br>可以避免很多不必要的麻烦,第三方库更新也不用手动管理.</p>
 <p>CocoaPods是iOS最常用的第三方类库管理工具，绝大部分有名的开源类库都支持CocoaPods,CocoaPods是用Ruby实现的，要想使用它首先需要有Ruby的环境。</p>
 <h1 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h1><p>1.查看ruby环境，系统默认安装ruby环境</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gem sources -l</span><br></pre></td></tr></table></figure>
@@ -643,7 +629,7 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;p&gt;最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。&lt;/p&gt;
+      &lt;p&gt;在项目开始时候不知道动态库会有很多坑,也可能操作姿势不对.这都不重要了，主要想记录一下如何使用CocoaPods添加第三方库.可以避免很多不必要的麻烦,第三方库更新也不用手动管理.&lt;/p&gt;
     
     </summary>
     
