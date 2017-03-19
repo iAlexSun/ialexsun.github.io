@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-03-19T06:52:57.000Z</updated>
+  <updated>2017-03-19T06:54:48.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2017/02/04/JS%E4%B8%8E%E5%8E%9F%E7%94%9F%E4%BA%A4%E4%BA%92%E9%9B%86%E4%B8%AD%E6%96%B9%E5%BC%8F/"/>
     <id>http://yoursite.com/2017/02/04/JS与原生交互集中方式/</id>
     <published>2017-02-04T13:15:27.000Z</published>
-    <updated>2017-03-19T06:52:57.000Z</updated>
+    <updated>2017-03-19T06:54:48.000Z</updated>
     
     <content type="html"><![CDATA[<p>发现有以下几种方法OC端与JS的交互大致有这几种：拦截协议、JavaScriptCore库、WKWebView、自定义NSURLProtocol拦截、WebViewJavascriptBridge。今天主要讲讲JavaScriptCore库的与OC端的交互。</p>
 <a id="more"></a>
@@ -136,9 +136,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2017/01/18/%E4%BB%BF%E5%86%99Keep%E7%99%BB%E5%BD%95%E9%A1%B5/"/>
     <id>http://yoursite.com/2017/01/18/仿写Keep登录页/</id>
     <published>2017-01-18T12:18:27.000Z</published>
-    <updated>2017-03-16T12:09:43.000Z</updated>
+    <updated>2017-03-19T06:56:00.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
+    <content type="html"><![CDATA[<p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。</p>
 <hr>
 <p>大家可以看一下效果图如下:</p>
 <p><img src="http://ac-mcm5vzvc.clouddn.com/9850b193013417ca04fd.gif" alt=""></p>
@@ -178,11 +180,9 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就
+      &lt;p&gt;有好多人使用过Keep来做运动,但是作为一个程序猿第一眼就被登录页的设计吸引住了，吸引原来是一个持续播放的视频在登录页。虽然有很多App早就实现了,但是笔者一直没有时间自己实现这个功能，后期笔者简单实现了一个可以循环播放视频的Demo。&lt;/p&gt;
     
     </summary>
-    
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
     
     
   </entry>
@@ -192,9 +192,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/"/>
     <id>http://yoursite.com/2016/08/14/内存管理--AutoreleasePool/</id>
     <published>2016-08-14T14:38:27.000Z</published>
-    <updated>2017-03-16T12:14:20.000Z</updated>
+    <updated>2017-03-19T06:58:26.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><hr>
+    <content type="html"><![CDATA[<p>接着上回书说到关于<code>AutoreleasePool</code>的内部构造，那我们就来看看<code>AutoreleasePoolPage</code>中到底是如何运行的.</p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><hr>
 <p>接着上回书说到关于<code>AutoreleasePool</code>的内部构造，那我们就来看看<code>AutoreleasePoolPage</code>中到底是如何运行的.</p>
 <h1 id="AutoreleasePoolPage-的结构"><a href="#AutoreleasePoolPage-的结构" class="headerlink" title="AutoreleasePoolPage 的结构"></a>AutoreleasePoolPage 的结构</h1><hr>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void *objc_autoreleasePoolPush(void) &#123;  </span><br><span class="line">    return AutoreleasePoolPage::push();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void objc_autoreleasePoolPop(void *ctxt) &#123;  </span><br><span class="line">    AutoreleasePoolPage::pop(ctxt);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -296,15 +298,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;接着上回书说到关于&lt;code&gt;AutoreleasePool&lt;/code&gt;的内部构造，那我们就来看看&lt;code&gt;Autorelea
+      &lt;p&gt;接着上回书说到关于&lt;code&gt;AutoreleasePool&lt;/code&gt;的内部构造，那我们就来看看&lt;code&gt;AutoreleasePoolPage&lt;/code&gt;中到底是如何运行的.&lt;/p&gt;
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
-    
-    
-      <category term="AutoreleasePool" scheme="http://yoursite.com/tags/AutoreleasePool/"/>
     
   </entry>
   
@@ -313,10 +310,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--ARC/"/>
     <id>http://yoursite.com/2016/08/14/内存管理--ARC/</id>
     <published>2016-08-14T02:38:27.000Z</published>
-    <updated>2017-03-16T12:14:05.000Z</updated>
+    <updated>2017-03-19T06:57:51.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><hr>
-<p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!</p>
+    <content type="html"><![CDATA[<p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！</p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！废话不多说，我会从基本概念带你进入ARC的世界!</p>
 <h1 id="ARC是什么"><a href="#ARC是什么" class="headerlink" title="ARC是什么"></a>ARC是什么</h1><hr>
 <p>ARC是<code>(Automatic Reference Counting)</code>的缩写。就是自动引用计数,在LLVM编译器中设置ARC为有效状态，就无需再次键入retian或者release代码。</p>
 <p>官方文档介绍ARC:</p>
@@ -344,15 +342,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不
+      &lt;p&gt;由于 Objective-C 中的内存管理是一个比较大的话题所以今天简单的介绍一下ARC内存管理机制是什么.虽然我们在日常开发中不需要考虑这些问题，但是如果你了解内存管理的机制你会更清楚你在开发中出错的地方在哪里！&lt;/p&gt;
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
-    
-    
-      <category term="ARC" scheme="http://yoursite.com/tags/ARC/"/>
     
   </entry>
   
@@ -361,10 +354,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/08/11/%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E4%BC%98%E5%8C%96/"/>
     <id>http://yoursite.com/2016/08/11/离屏渲染的优化/</id>
     <published>2016-08-11T02:38:27.000Z</published>
-    <updated>2017-03-16T12:13:41.000Z</updated>
+    <updated>2017-03-19T06:57:11.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><hr>
-<p>圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在,What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？的确,数量少的圆角不会带来离屏渲染导致掉帧的问题,但是你是否有过20，30，40….或者更多的圆角呢？如果有过你一定知道带来的后果,废话少说,切入正题。</p>
+    <content type="html"><![CDATA[<p>圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在。What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？</p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在,What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？的确,数量少的圆角不会带来离屏渲染导致掉帧的问题,但是你是否有过20，30，40….或者更多的圆角呢？如果有过你一定知道带来的后果,废话少说,切入正题。</p>
 <h1 id="离屏渲染"><a href="#离屏渲染" class="headerlink" title="离屏渲染"></a>离屏渲染</h1><hr>
 <p>OpenGL中，GPU屏幕渲染有以下两种方式： On-Screen Rendering 意为当前屏幕渲染，指的是GPU的渲染操作是在当前用于显示的屏幕缓冲区中进行。 Off-Screen Rendering 意为离屏渲染，指的是GPU在当前屏幕缓冲区以外新开辟一个缓冲区进行渲染操作。</p>
 <p>相比于当前屏幕渲染，离屏渲染的代价是很高的，主要体现在两个方面： 创建新缓冲区 要想进行离屏渲染，首先要创建一个新的缓冲区。 上下文切换 离屏渲染的整个过程，需要多次切换上下文环境：先是从当前屏幕（On-Screen）切换到离屏（Off-Screen）；</p>
@@ -400,17 +394,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;hr&gt;
-&lt;p&gt;圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不
+      &lt;p&gt;圆角设置大家一定都会使用,一行两行代码就会搞定,但是你真的认为设置圆角就这么简单吗？如果你的程序圆角数量只有几个的时候你可能感觉不到这个掉帧杀手的存在。What? 你会问,我用了这么久的圆角都没有掉帧的情况,你在逗我？&lt;/p&gt;
     
     </summary>
     
-      <category term="日志" scheme="http://yoursite.com/categories/%E6%97%A5%E5%BF%97/"/>
-    
-    
-      <category term="离屏渲染" scheme="http://yoursite.com/tags/%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/"/>
-    
-      <category term="性能优化" scheme="http://yoursite.com/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
     
   </entry>
   
@@ -419,9 +406,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/07/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E4%BA%86%E8%A7%A3Runloop/"/>
     <id>http://yoursite.com/2016/07/24/深入浅出了解Runloop/</id>
     <published>2016-07-24T02:38:27.000Z</published>
-    <updated>2017-03-16T12:14:36.000Z</updated>
+    <updated>2017-03-19T06:59:06.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念以及底层实现原理.学习了大神的Runloop的讲解,有了一定的理解了Runloop,这个词在我的认知中不再只是一个简单的 “跑圈” 的程度,但是也不会理解的很透,日后有机会会更加深入学习关于底层知识的.</p>
+    <content type="html"><![CDATA[<p>最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念以及底层实现原理.学习了大神的Runloop的讲解,有了一定的理解了Runloop,这个词在我的认知中不再只是一个简单的 “跑圈” 的程度,但是也不会理解的很透,日后有机会会更加深入学习关于底层知识的.</p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念以及底层实现原理.学习了大神的Runloop的讲解,有了一定的理解了Runloop,这个词在我的认知中不再只是一个简单的 “跑圈” 的程度,但是也不会理解的很透,日后有机会会更加深入学习关于底层知识的.</p>
 <h1 id="Runloop基本概念"><a href="#Runloop基本概念" class="headerlink" title="Runloop基本概念"></a>Runloop基本概念</h1><p>很多人都知道Runloop浅显的意思 “跑圈” “循环”啊,如果深入一点的话就是用一个do while一个死循环来跑圈的,接下来就让我们看看Runloop是如何进行跑圈的吧！</p>
 <ul>
 <li><p>RunLoop的基本作用:</p>
@@ -521,14 +510,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念
+      &lt;p&gt;最近一直在学习关于Runloop的知识,由浅入深的学习了一段时间,这篇文章将从 CFRunLoop 的源码入手，介绍 RunLoop 的概念以及底层实现原理.学习了大神的Runloop的讲解,有了一定的理解了Runloop,这个词在我的认知中不再只是一个简单的 “跑圈” 的程度,但是也不会理解的很透,日后有机会会更加深入学习关于底层知识的.&lt;/p&gt;
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
-    
-    
-      <category term="Runloop" scheme="http://yoursite.com/tags/Runloop/"/>
     
   </entry>
   
@@ -537,9 +522,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2016/07/06/%E5%85%B3%E4%BA%8EGCD%E4%BD%A0%E5%BA%94%E8%AF%A5%E7%9F%A5%E9%81%93%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B/"/>
     <id>http://yoursite.com/2016/07/06/关于GCD你应该知道的那点事/</id>
     <published>2016-07-06T02:38:27.000Z</published>
-    <updated>2017-03-16T12:13:26.000Z</updated>
+    <updated>2017-03-19T06:56:22.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
+    <content type="html"><![CDATA[<p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用</p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用。由于GCD的东西比较多，我会分好几篇文章介绍，这篇文章主要介绍GCD中的queue相关知识。</p>
 <h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><ul>
 <li><p>一个应用程序开启一定会有一个进程,<code>必须</code>得有线程（每1个进程至少要有1条线程）.一个进程（程序）的所有任务都在线程中执行。</p>
 </li>
@@ -600,16 +587,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是
+      &lt;p&gt;为什么要引入多线程？多线程的好处?GCD又是什么? NSThread已经属于古董级别的东西了，欣赏一下可以，真正使用就不要麻烦他了。GCD是多线程中的新贵，比起NSThread更加强大，也更容易使用&lt;/p&gt;
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
-    
-    
-      <category term="多线程" scheme="http://yoursite.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
-      <category term="GCD" scheme="http://yoursite.com/tags/GCD/"/>
     
   </entry>
   
@@ -618,9 +599,11 @@ NSLog(@&quot;Log: %@&quot;, data);
     <link href="http://yoursite.com/2015/08/30/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%B8%8A%E6%9E%B6App%E7%9A%84%E5%9D%91/"/>
     <id>http://yoursite.com/2015/08/30/第一次上架App的坑/</id>
     <published>2015-08-30T02:38:27.000Z</published>
-    <updated>2017-03-16T12:13:02.000Z</updated>
+    <updated>2017-03-19T06:55:30.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。</p>
+    <content type="html"><![CDATA[<p>最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。</p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。</p>
 <p>优点:方便,直接拖入操作简单<br>缺点:审核时候会产生各种奇葩的错误</p>
 <p>在项目开始时候不知道动态库会有很多坑,也可能操作姿势不对.这都不重要了，主要想记录一下如何使用CocoaPods添加第三方库.<br>可以避免很多不必要的麻烦,第三方库更新也不用手动管理.</p>
 <p>CocoaPods是iOS最常用的第三方类库管理工具，绝大部分有名的开源类库都支持CocoaPods,CocoaPods是用Ruby实现的，要想使用它首先需要有Ruby的环境。</p>
@@ -660,19 +643,10 @@ NSLog(@&quot;Log: %@&quot;, data);
     
     <summary type="html">
     
-      &lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。&lt;/p&gt;
-&lt;p
+      &lt;p&gt;最近由于第一次上架App所以想记录一下走过的坑,首先说明一下CocoaPods很多人都会使用，从iOS 8开始可以引用动态库。&lt;/p&gt;
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
-    
-    
-      <category term="错误编码" scheme="http://yoursite.com/tags/%E9%94%99%E8%AF%AF%E7%BC%96%E7%A0%81/"/>
-    
-      <category term="App上架" scheme="http://yoursite.com/tags/App%E4%B8%8A%E6%9E%B6/"/>
-    
-      <category term="cocoapods" scheme="http://yoursite.com/tags/cocoapods/"/>
     
   </entry>
   
