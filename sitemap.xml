@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2016/08/14/%E6%8E%A2%E7%B4%A2AutoreleasePool%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84/</loc>
+    
+    <lastmod>2017-03-27T13:00:36.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2015/08/30/%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%B8%8A%E6%9E%B6App%E7%9A%84%E5%9D%91/</loc>
     
     <lastmod>2017-03-19T14:42:35.000Z</lastmod>
@@ -30,16 +37,9 @@
   </url>
   
   <url>
-    <loc>http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--ARC/</loc>
+    <loc>http://yoursite.com/2016/08/14/%E6%8E%A2%E7%B4%A2ARC/</loc>
     
     <lastmod>2017-03-19T14:39:36.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2016/08/14/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86--AutoreleasePool/</loc>
-    
-    <lastmod>2017-03-19T14:39:00.000Z</lastmod>
     
   </url>
   
