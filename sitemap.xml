@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/%E7%AE%80%E5%8E%86.html</loc>
+    
+    <lastmod>2017-06-22T07:07:28.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2017/06/21/CoreML%20and%20Vision/</loc>
     
     <lastmod>2017-06-22T07:02:26.000Z</lastmod>
@@ -47,13 +54,6 @@
     <loc>http://yoursite.com/2017/02/04/JS%E4%B8%8E%E5%8E%9F%E7%94%9F%E4%BA%A4%E4%BA%92%E9%9B%86%E4%B8%AD%E6%96%B9%E5%BC%8F/</loc>
     
     <lastmod>2017-03-19T14:36:37.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/%E7%AE%80%E5%8E%86.html</loc>
-    
-    <lastmod>2016-12-21T06:45:28.000Z</lastmod>
     
   </url>
   
